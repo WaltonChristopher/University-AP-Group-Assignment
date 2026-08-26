@@ -1,0 +1,52 @@
+## Visual Studio / .NET
+.vs/
+bin/
+obj/
+Debug/
+Release/
+x64/
+x86/
+TestResults/
+*.user
+*.suo
+*.userosscache
+*.rsuser
+*.nupkg
+packages/
+
+## ASP.NET / Blazor generated files
+*.dll
+*.pdb
+*.cache
+wwwroot/_framework/
+wwwroot/_content/
+appsettings.*.json
+!appsettings.json
+!appsettings.Development.json
+
+## Docker
+docker-compose.override.yml
+.docker/
+*.tar
+
+## Build and tooling
+.sonarqube/
+.coverage/
+coverage/
+artifacts/
+TestResults/
+*.log
+
+## IDE and OS files
+.idea/
+.vscode/
+!.vscode/extensions.json
+*.swp
+.DS_Store
+Thumbs.db
+
+## User secrets and local environment
+secrets.json
+.env
+.env.*
+!.env.example
