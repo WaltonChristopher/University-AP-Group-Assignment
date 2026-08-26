@@ -3,6 +3,25 @@
 ## Project Overview
 This project is part of an assignment for Cranfield University Digital and Technology Solutions apprentices. A detailed description of the task, given in the assignment brief, can be found under the heading `The Assignment Task`.
 
+## Developer Setup
+For ease of setup and consistency we are using a Docker development container. 
+
+### Required Software
+- Git
+- VS Code
+  - VS Code `Dev Containers` extension
+- Windows Subsystem for Linux 2
+  - Open powershell and run `wsl --install` then restart your computer
+- Docker Desktop (Windows)[https://www.docker.com/products/docker-desktop/]
+  - Choose the WSL 2 installation
+
+### Setting up the dev container
+After installing the required software, you will need to reopen VS Code. You will be notified that you can open the project in a container; accept and the VS Code window will reload, download the container, and run it.
+
+You will then need to set your Git global config variables by running:
+`git config --global user.name ["Your name"]`
+`git config --global user.email [Your email address]`
+
 ## The Assignment Task
 
 ### Task

@@ -1,0 +1,36 @@
+{
+  "name": "Yodaphone AI Chatbot Development",
+  "image": "mcr.microsoft.com/devcontainers/dotnet:2-10.0-noble",
+  "remoteUser": "vscode",
+  "containerEnv": {
+    "ASPNETCORE_ENVIRONMENT": "Development",
+    "ASPNETCORE_URLS": "http://0.0.0.0:5000"
+  },
+  "forwardPorts": [
+    5000
+  ],
+  "portsAttributes": {
+    "5000": {
+      "label": "Yodaphone web application",
+      "onAutoForward": "openBrowser"
+    }
+  },
+  "mounts": [
+    "source=yodaphone-nuget,target=/home/vscode/.nuget/packages,type=volume",
+    "source=yodaphone-secrets,target=/home/vscode/.microsoft/usersecrets,type=volume"
+  ],
+  //"postCreateCommand": "dotnet restore Yodaphone.sln",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-dotnettools.csdevkit",
+        "ms-dotnettools.vscode-dotnet-runtime",
+        "ms-azuretools.vscode-containers"
+      ],
+      "settings": {
+        "editor.formatOnSave": true,
+        "dotnet.defaultSolution": "Yodaphone.sln"
+      }
+    }
+  }
+}
