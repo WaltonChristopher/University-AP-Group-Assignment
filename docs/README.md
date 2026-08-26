@@ -34,6 +34,14 @@ Alternatively, you can manually reopen in container by pressing `Ctrl+Shift+P` a
 You will then need to set your Git global config variables by running:
 `git config --global user.name ["Your name"]` and `git config --global user.email [Your email address]`
 
+### Building and running the app
+
+First you will need to download and resolve NuGet packages: `dotnet restore Yodaphone.sln`.
+
+Then you can build the solution: `dotnet build Yodaphone.sln`.
+
+Finally you can run the solution: `dotnet watch --project src/Yodaphone.Web --no-launch-profile`. This will update live as you make changes.
+
 ## The Assignment Task
 
 ### Task
