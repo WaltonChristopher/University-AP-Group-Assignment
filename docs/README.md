@@ -1,3 +1,8 @@
+# Yodaphone AI-powered Customer Service Chatbot
+
+## Project Overview
+This project is part of an assignment for Cranfield University Digital and Technology Solutions apprentices. A detailed description of the task, given in the assignment brief, can be found under the heading `The Assignment Task`.
+
 ## The Assignment Task
 
 ### Task
@@ -40,3 +45,8 @@
   - Test results and evaluation
 - Evaluate and test your solution, ensuring both functional and non-functional requirements are met.
 - Deliver a 15-minute presentation showcasing your software solution, supported by a poster and a live demonstration. This should be aimed at both technical and non-technical audiences, highlighting the problem addressed, your design and implementation approach, and the impact of your solution.
+
+## Contributors
+- S44635
+
+## AI Use Acknowledgement
