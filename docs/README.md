@@ -19,8 +19,7 @@ For ease of setup and consistency we are using a Docker development container.
 After installing the required software, you will need to reopen VS Code. You will be notified that you can open the project in a container; accept and the VS Code window will reload, download the container, and run it.
 
 You will then need to set your Git global config variables by running:
-`git config --global user.name ["Your name"]`
-`git config --global user.email [Your email address]`
+`git config --global user.name ["Your name"]` and `git config --global user.email [Your email address]`
 
 ## The Assignment Task
 
