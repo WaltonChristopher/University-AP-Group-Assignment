@@ -8,6 +8,8 @@ This project is part of an assignment for Cranfield University Digital and Techn
 
 For ease of setup and consistency we are using a Docker development container. 
 
+New to C#, .NET, or Blazor? Use the [Yodaphone developer cheatsheet](DEVELOPER-CHEATSHEET.md) for the daily workflow, code examples, debugging, testing, and common fixes.
+
 ### Required Software
 
 - Git
@@ -31,6 +33,14 @@ Alternatively, you can manually reopen in container by pressing `Ctrl+Shift+P` a
 
 You will then need to set your Git global config variables by running:
 `git config --global user.name ["Your name"]` and `git config --global user.email [Your email address]`
+
+### Building and running the app
+
+First you will need to download and resolve NuGet packages: `dotnet restore Yodaphone.sln`.
+
+Then you can build the solution: `dotnet build Yodaphone.sln`.
+
+Finally you can run the solution: `dotnet watch --project src/Yodaphone.Web --no-launch-profile`. This will update live as you make changes.
 
 ## The Assignment Task
 
@@ -79,3 +89,12 @@ You will then need to set your Git global config variables by running:
 - S44635
 
 ## AI Use Acknowledgement
+
+ChatGPT 5.6 Sol (OpenAI, https://chatgpt.com/) 
+
+
+ChatGPT 5.6 Sol has been used in the initial code creation of this project. That includes:
+- Setting up the default .NET dev container
+- Establishing the default ASP.NET / Blazor project
+
+All AI generated content has been subject to human review.

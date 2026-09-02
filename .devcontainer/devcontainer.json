@@ -2,9 +2,10 @@
   "name": "Yodaphone AI Chatbot Development",
   "image": "mcr.microsoft.com/devcontainers/dotnet:2-10.0-noble",
   "remoteUser": "vscode",
+  "onCreateCommand": "sudo mkdir -p /home/vscode/.nuget/NuGet /home/vscode/.microsoft/usersecrets /home/vscode/.aspnet/DataProtection-Keys && sudo chown -R vscode:vscode /home/vscode/.nuget /home/vscode/.microsoft /home/vscode/.aspnet",
   "containerEnv": {
     "ASPNETCORE_ENVIRONMENT": "Development",
-    "ASPNETCORE_URLS": "http://0.0.0.0:5000"
+    "ASPNETCORE_HTTP_PORTS": "5000"
   },
   "forwardPorts": [
     5000
@@ -17,9 +18,10 @@
   },
   "mounts": [
     "source=yodaphone-nuget,target=/home/vscode/.nuget/packages,type=volume",
-    "source=yodaphone-secrets,target=/home/vscode/.microsoft/usersecrets,type=volume"
+    "source=yodaphone-secrets,target=/home/vscode/.microsoft/usersecrets,type=volume",
+    "source=yodaphone-dataprotection,target=/home/vscode/.aspnet/DataProtection-Keys,type=volume"
   ],
-  //"postCreateCommand": "dotnet restore Yodaphone.sln",
+  "postCreateCommand": "dotnet restore Yodaphone.sln",
   "customizations": {
     "vscode": {
       "extensions": [
