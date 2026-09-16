@@ -1,10 +1,15 @@
+using Yodaphone.Web.Chat;
+using Yodaphone.Web.Domain;
+
+namespace Yodaphone.Web.Chat.Agents;
+
 /// <summary>
 /// An implementation of IChatAgent that provides offline responses.
 /// </summary>
-public class OfflineChatAgent : IChatAgent
+public sealed class OfflineChatAgent : ChatAgentBase
 {
-    public Task<AgentChatResponse> GetReplyAsync(
-        IReadOnlyList<ChatMessage> message,
+    protected override Task<AgentChatResponse> GetReplyCoreAsync(
+        IReadOnlyList<ChatMessage> history,
         CancellationToken cancellationToken
     )
     {

@@ -1,4 +1,8 @@
 using Xunit;
+using Yodaphone.Web.Chat.Agents;
+using Yodaphone.Web.Domain;
+
+namespace Yodaphone.Web.Tests.Chat.Agents;
 
 public sealed class GitHubCopilotAgentTests
 {
@@ -27,9 +31,12 @@ public sealed class GitHubCopilotAgentTests
     {
         using var cancellationTokenSource = new CancellationTokenSource();
         cancellationTokenSource.Cancel();
+
+        var conversation = new Conversation(Guid.NewGuid(), DateTimeOffset.UtcNow);
+
         var history = new[]
         {
-            new ChatMessage { Role = "Customer", Content = "Hello" }
+            conversation.AddMessage(MessageRole.Customer, "Hello")
         };
 
         await Assert.ThrowsAnyAsync<OperationCanceledException>(

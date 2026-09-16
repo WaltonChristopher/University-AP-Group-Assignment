@@ -1,10 +1,13 @@
 using GitHub.Copilot;
+using Yodaphone.Web.Chat;
+using Yodaphone.Web.Domain;
 
+namespace Yodaphone.Web.Chat.Agents;
 
 /// <summary>
 /// An implementation of IChatAgent that integrates with the GitHub Copilot service.
 /// </summary>
-public class GitHubCopilotAgent : IChatAgent
+public sealed class GitHubCopilotAgent : ChatAgentBase
 {
 
     private const string SystemPrompt = """
@@ -20,21 +23,11 @@ public class GitHubCopilotAgent : IChatAgent
     /// <param name="history">The chat history.</param>
     /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns>The agent's response.</returns>
-    public async Task<AgentChatResponse> GetReplyAsync(
+    protected override async Task<AgentChatResponse> GetReplyCoreAsync(
         IReadOnlyList<ChatMessage> history,
         CancellationToken cancellationToken
     )
     {
-        // Error handling for null or empty message list, or cancellation requested
-        ArgumentNullException.ThrowIfNull(history, nameof(history));
-
-        if (history.Count == 0)
-        {
-            throw new ArgumentException("The message list cannot be empty.", nameof(history));
-        }
-
-        cancellationToken.ThrowIfCancellationRequested();
-
         // Initialize the runtime directory for the Copilot client
         var runtimeDirectory = Path.Combine(Path.GetTempPath(), "Yodaphone-Copilot", "temp runtime"); //TODO: replace temp runtime with conversation ID
 

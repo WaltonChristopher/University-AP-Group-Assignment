@@ -10,11 +10,6 @@ public sealed class Conversation
     public ConversationStatus Status { get; private set; }
     public IReadOnlyCollection<ChatMessage> Messages => messages.AsReadOnly();
 
-    // Parameterless constructor kept for EF Core (issue #8).
-    private Conversation()
-    {
-    }
-
     public Conversation(Guid id, DateTimeOffset startedAt)
     {
         Id = id;
