@@ -1,0 +1,38 @@
+.yp-input-bar {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: flex-end;
+    gap: 0.65rem;
+    background: var(--yp-surface-chat);
+    border-radius: var(--yp-radius-lg);
+    padding: 0.6rem 0.6rem 0.6rem 1rem;
+    min-height: var(--yp-input-height);
+}
+
+.yp-input-bar__field {
+    flex: 1 1 auto;
+    resize: none;
+    border: none;
+    background: transparent;
+    color: var(--yp-text-on-chat);
+    font-family: var(--yp-font-body);
+    font-size: 0.95rem;
+    line-height: 1.4;
+    max-height: 8.5rem;
+    padding: 0.6rem 0;
+}
+
+.yp-input-bar__field::placeholder {
+    color: var(--yp-text-on-chat);
+    opacity: 0.45;
+}
+
+.yp-input-bar__field:disabled {
+    opacity: 0.5;
+}
+
+.yp-input-bar__send {
+    flex: 0 0 auto;
+    min-width: 88px;
+    height: 42px;
+}

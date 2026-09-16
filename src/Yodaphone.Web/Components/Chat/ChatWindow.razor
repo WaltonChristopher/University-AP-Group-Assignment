@@ -1,0 +1,48 @@
+@inject IJSRuntime JS
+
+<section class="yp-chat-window" id="@_elementId">
+    @if (Messages.Count == 0)
+    {
+        <p class="yp-chat-window__empty">Send a message to start the conversation.</p>
+    }
+
+    @foreach (var message in Messages)
+    {
+        <ChatMessage Message="message" />
+    }
+
+    @if (IsBotTyping)
+    {
+        <div class="yp-typing" aria-live="polite">
+            <span class="yp-typing__dot"></span>
+            <span class="yp-typing__dot"></span>
+            <span class="yp-typing__dot"></span>
+        </div>
+    }
+</section>
+
+@code {
+    [Parameter] public List<Message> Messages { get; set; } = new();
+    [Parameter] public bool IsBotTyping { get; set; }
+
+    private readonly string _elementId = $"yp-chat-window-{Guid.NewGuid():N}";
+    private int _lastRenderedCount;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        // Keep the newest message in view any time the list grows or the
+        // "typing" indicator appears — matches natural chat-app behavior.
+        var shouldScroll = firstRender || Messages.Count != _lastRenderedCount || IsBotTyping;
+        _lastRenderedCount = Messages.Count;
+
+        if (shouldScroll)
+        {
+            await ScrollToBottomAsync();
+        }
+    }
+
+    public async Task ScrollToBottomAsync()
+    {
+        await JS.InvokeVoidAsync("chatInterop.scrollToBottom", _elementId);
+    }
+}

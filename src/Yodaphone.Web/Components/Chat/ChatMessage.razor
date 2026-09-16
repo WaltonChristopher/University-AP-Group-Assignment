@@ -1,0 +1,17 @@
+<div class="yp-message-row @(Message.IsFromBot ? "yp-message-row--bot" : "yp-message-row--user")">
+    <div class="yp-bubble @(Message.IsFromBot ? "yp-bubble--bot" : "yp-bubble--user")">
+        <span class="yp-bubble__sender">@(Message.IsFromBot ? "YodaPhone AI" : "You")</span>
+        <p class="yp-bubble__content">@Message.Content</p>
+        <div class="yp-bubble__meta">
+            <span>@Message.DateTime.ToString("h:mm tt")</span>
+            @if (!Message.IsFromBot)
+            {
+                <span class="yp-bubble__status">@Message.Status</span>
+            }
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter, EditorRequired] public Message Message { get; set; } = null!;
+}
