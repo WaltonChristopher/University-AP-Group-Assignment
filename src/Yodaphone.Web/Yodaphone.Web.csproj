@@ -9,5 +9,8 @@
     <!-- Workaround for dotnet/sdk#54309 on Linux and macOS -->
     <IntermediateOutputPath>obj/$(Configuration)/</IntermediateOutputPath>
   </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Github.Copilot.SDK" Version="1.0.13-preview.2" />
+  </ItemGroup>
 
 </Project>
