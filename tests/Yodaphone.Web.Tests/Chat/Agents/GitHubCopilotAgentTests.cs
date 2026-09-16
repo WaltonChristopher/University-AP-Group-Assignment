@@ -9,6 +9,28 @@ public sealed class GitHubCopilotAgentTests
     private readonly GitHubCopilotAgent agent = new();
 
     [Fact]
+    public void BuildTranscript_FormatsMessagesInOrderAndAddsAssistantPrompt()
+    {
+        var conversation = new Conversation(Guid.NewGuid(), DateTimeOffset.UtcNow);
+        var history = new[]
+        {
+            conversation.AddMessage(MessageRole.Customer, "I need help"),
+            conversation.AddMessage(MessageRole.Assistant, "How can I help?"),
+            conversation.AddMessage(MessageRole.System, "Escalation available")
+        };
+
+        var transcript = GitHubCopilotAgent.BuildTranscript(history);
+
+        var expected = string.Join(
+            Environment.NewLine,
+            "Customer: I need help",
+            "Assistant: How can I help?",
+            "System: Escalation available",
+            "Yodaphone assistant: ");
+        Assert.Equal(expected, transcript);
+    }
+
+    [Fact]
     public async Task GetReplyAsync_WithNullHistory_ThrowsArgumentNullException()
     {
         var exception = await Assert.ThrowsAsync<ArgumentNullException>(

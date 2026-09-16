@@ -88,7 +88,7 @@ public sealed class GitHubCopilotAgent : ChatAgentBase
     /// </summary>
     /// <param name="history"></param>
     /// <returns></returns>
-    private static string BuildTranscript(IEnumerable<ChatMessage> history)
+    internal static string BuildTranscript(IEnumerable<ChatMessage> history)
     {
         var lines = history.Select(msg => $"{msg.Role}: {msg.Content}");
         return $"{string.Join(Environment.NewLine, lines)}{Environment.NewLine}Yodaphone assistant: ";
