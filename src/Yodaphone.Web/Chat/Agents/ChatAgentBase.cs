@@ -13,13 +13,19 @@ public abstract class ChatAgentBase : IChatAgent
     /// <param name="history">The chat history.</param>
     /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns>The agent's reply.</returns>
-    public Task<AgentChatResponse> GetReplyAsync(
+    public async Task<AgentChatResponse> GetReplyAsync(
         IReadOnlyList<ChatMessage> history,
         CancellationToken cancellationToken)
     {
         ChatAgentRequestValidator.Validate(history, cancellationToken);
 
-        return GetReplyCoreAsync(history, cancellationToken);
+        var response = await GetReplyCoreAsync(history, cancellationToken);
+        if (response is null || string.IsNullOrWhiteSpace(response.Content))
+        {
+            throw new InvalidOperationException("The agent response was empty or null.");
+        }
+
+        return response;
     }
 
     /// <summary>
