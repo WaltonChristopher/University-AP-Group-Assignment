@@ -7,12 +7,15 @@ public sealed class ConversationTests
     [Fact]
     public void AddMessage_appends_message_and_updates_last_activity()
     {
-        var conversation = new Conversation(Guid.NewGuid(), DateTimeOffset.UtcNow);
+        var startedAt = DateTimeOffset.UtcNow.AddMinutes(-5);
+        var conversation = new Conversation(Guid.NewGuid(), startedAt);
 
         var message = conversation.AddMessage(MessageRole.Customer, "Hello");
 
         Assert.Single(conversation.Messages);
         Assert.Equal(message, conversation.Messages.First());
+        Assert.True(conversation.LastActivityAt > startedAt);
+        Assert.True(conversation.LastActivityAt >= message.SentAt);
     }
 
     [Fact]
