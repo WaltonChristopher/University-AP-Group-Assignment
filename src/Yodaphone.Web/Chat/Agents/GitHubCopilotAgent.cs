@@ -1,15 +1,15 @@
 using GitHub.Copilot;
-using Yodaphone.Web.Chat;
 using Yodaphone.Web.Domain;
 
 namespace Yodaphone.Web.Chat.Agents;
 
 /// <summary>
-/// An implementation of IChatAgent that integrates with the GitHub Copilot service.
+/// An implementation of ChatAgentBase that integrates with the GitHub Copilot service.
 /// </summary>
 public sealed class GitHubCopilotAgent : ChatAgentBase
 {
 
+    // System prompt to guide the behavior of the Copilot agent.
     private const string SystemPrompt = """
         You are Yodaphone, a helpful customer-service assistant.
         Be concise, polite, and clear.
@@ -23,6 +23,9 @@ public sealed class GitHubCopilotAgent : ChatAgentBase
     /// <param name="history">The chat history.</param>
     /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns>The agent's response.</returns>
+    /// <exception cref="InvalidOperationException">Thrown when the Copilot response is empty or null.</exception>
+    /// <exception cref="OperationCanceledException">Thrown when the operation is canceled.</exception>
+    /// <exception cref="Exception">Thrown for other unexpected errors during the Copilot interaction.</exception>
     protected override async Task<AgentChatResponse> GetReplyCoreAsync(
         IReadOnlyList<ChatMessage> history,
         CancellationToken cancellationToken
@@ -68,6 +71,7 @@ public sealed class GitHubCopilotAgent : ChatAgentBase
 
         var content = response?.Data.Content;
 
+        // Check the response has content
         if (string.IsNullOrWhiteSpace(content))
         {
             throw new InvalidOperationException("The Copilot response was empty or null.");

@@ -1,4 +1,3 @@
-using Yodaphone.Web.Chat;
 using Yodaphone.Web.Domain;
 
 namespace Yodaphone.Web.Chat.Agents;
@@ -9,10 +8,10 @@ namespace Yodaphone.Web.Chat.Agents;
 public interface IChatAgent
 {
     /// <summary>
-    /// Gets a reply based on a non-empty chat history.
+    /// Asynchronously gets a reply based on a non-empty chat history.
     /// </summary>
     /// <param name="history">The chat history to respond to.</param>
-    /// <param name="cancellationToken">A token used to cancel the operation.</param>
+    /// <param name="cancellationToken">A token used to cancel the asynchronous operation.</param>
     /// <exception cref="ArgumentNullException">
     /// Thrown when <paramref name="history"/> is <see langword="null"/>.
     /// </exception>
@@ -21,6 +20,9 @@ public interface IChatAgent
     /// </exception>
     /// <exception cref="OperationCanceledException">
     /// Thrown when <paramref name="cancellationToken"/> has been cancelled.
+    /// </exception>
+    /// <exception cref="InvalidOperationException">
+    /// Thrown when the response is empty or null.
     /// </exception>
     Task<AgentChatResponse> GetReplyAsync(
         IReadOnlyList<ChatMessage> history,
