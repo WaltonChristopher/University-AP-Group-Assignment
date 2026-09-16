@@ -11,6 +11,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{9BA66D2C
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Yodaphone.Web.Tests", "tests\Yodaphone.Web.Tests\Yodaphone.Web.Tests.csproj", "{75217D2B-D54F-4C31-A999-7E5EE95B6784}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Yodaphone.Domain.Tests", "tests\Yodaphone.Domain.Tests\Yodaphone.Domain.Tests.csproj", "{6DCDE390-4719-47E6-B007-C68DCF74F44B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -43,10 +45,20 @@ Global
 		{75217D2B-D54F-4C31-A999-7E5EE95B6784}.Release|Any CPU.Build.0 = Release|Any CPU
 		{75217D2B-D54F-4C31-A999-7E5EE95B6784}.Release|x64.ActiveCfg = Release|Any CPU
 		{75217D2B-D54F-4C31-A999-7E5EE95B6784}.Release|x64.Build.0 = Release|Any CPU
-		{75217D2B-D54F-4C31-A999-7E5EE95B6784}.Release|x64.ActiveCfg = Release|Any CPU
-		{75217D2B-D54F-4C31-A999-7E5EE95B6784}.Release|x64.Build.0 = Release|Any CPU
 		{75217D2B-D54F-4C31-A999-7E5EE95B6784}.Release|x86.ActiveCfg = Release|Any CPU
 		{75217D2B-D54F-4C31-A999-7E5EE95B6784}.Release|x86.Build.0 = Release|Any CPU
+		{6DCDE390-4719-47E6-B007-C68DCF74F44B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6DCDE390-4719-47E6-B007-C68DCF74F44B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6DCDE390-4719-47E6-B007-C68DCF74F44B}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{6DCDE390-4719-47E6-B007-C68DCF74F44B}.Debug|x64.Build.0 = Debug|Any CPU
+		{6DCDE390-4719-47E6-B007-C68DCF74F44B}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{6DCDE390-4719-47E6-B007-C68DCF74F44B}.Debug|x86.Build.0 = Debug|Any CPU
+		{6DCDE390-4719-47E6-B007-C68DCF74F44B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6DCDE390-4719-47E6-B007-C68DCF74F44B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6DCDE390-4719-47E6-B007-C68DCF74F44B}.Release|x64.ActiveCfg = Release|Any CPU
+		{6DCDE390-4719-47E6-B007-C68DCF74F44B}.Release|x64.Build.0 = Release|Any CPU
+		{6DCDE390-4719-47E6-B007-C68DCF74F44B}.Release|x86.ActiveCfg = Release|Any CPU
+		{6DCDE390-4719-47E6-B007-C68DCF74F44B}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -54,5 +66,6 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{1D2BE8B5-9360-4B28-8FC8-D693D77C8232} = {827E0CD3-B72D-47B6-A68D-7590B98EB39B}
 		{75217D2B-D54F-4C31-A999-7E5EE95B6784} = {9BA66D2C-8F84-4EAC-89DD-4F999343B14D}
+		{6DCDE390-4719-47E6-B007-C68DCF74F44B} = {9BA66D2C-8F84-4EAC-89DD-4F999343B14D}
 	EndGlobalSection
 EndGlobal
