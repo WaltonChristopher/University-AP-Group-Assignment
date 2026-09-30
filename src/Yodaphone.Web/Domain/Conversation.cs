@@ -28,6 +28,11 @@ public sealed class Conversation
             throw new InvalidOperationException("Cannot add a message to a closed conversation.");
         }
 
+        if (role == MessageRole.Customer)
+        {
+            ChatContentSanitizer.EnsureSafeUserContent(content);
+        }
+
         var message = new ChatMessage(Id, role, content);
         messages.Add(message);
         LastActivityAt = DateTimeOffset.UtcNow;
