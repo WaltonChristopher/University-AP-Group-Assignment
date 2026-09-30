@@ -24,11 +24,6 @@ internal static class ChatAgentRequestValidator
             throw new ArgumentException("The message list cannot be empty.", nameof(history));
         }
 
-        if (cancellationToken.IsCancellationRequested)
-        {
-            throw new OperationCanceledException("The operation was canceled.", cancellationToken);
-        }
-
         // Throw if cancellation is requested after validation
         cancellationToken.ThrowIfCancellationRequested();
     }

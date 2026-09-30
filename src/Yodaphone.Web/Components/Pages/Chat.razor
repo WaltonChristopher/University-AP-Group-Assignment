@@ -1,0 +1,140 @@
+@page "/chat"
+@using Yodaphone.Web.Components.Chat
+@using Yodaphone.Web.Models
+@using Yodaphone.Web.Services
+@inject IChatAiService ChatAiService
+@inject IJSRuntime JS
+
+<PageTitle>YodaPhone AI — Chat</PageTitle>
+
+<div class="yp-shell @(_darkMode ? "dark" : "")">
+
+    <header class="yp-header">
+        <div class="yp-header__brand">
+            <span class="yp-logo" aria-hidden="true">YP</span>
+            <span class="yp-brand-name">YodaPhone <em>AI</em></span>
+        </div>
+
+        <button class="yp-btn yp-btn--ghost yp-header__new-chat" @onclick="StartNewChat">
+            New chat
+        </button>
+
+        <div class="yp-header__spacer"></div>
+
+        <div class="yp-header__user">
+            <span class="yp-header__user-label">@UserName</span>
+            <span class="yp-avatar" aria-hidden="true">@UserInitial</span>
+        </div>
+    </header>
+
+    <div class="yp-body">
+        <Sidebar
+            DarkMode="_darkMode"
+            OnDarkModeToggled="ToggleDarkMode"
+            OnHelpRequested="ShowHelp" />
+
+        <main class="yp-main">
+            <ChatWindow
+                @ref="_chatWindow"
+                Messages="_conversation.AllMessages"
+                IsBotTyping="_isWaitingForReply" />
+
+            <ChatInput
+                OnMessageSent="HandleUserMessageSent"
+                IsSending="_isWaitingForReply" />
+        </main>
+    </div>
+</div>
+
+@code {
+    private const string UserName = "Alex Rivera";
+    private string UserInitial => string.IsNullOrWhiteSpace(UserName) ? "?" : UserName[0].ToString();
+
+    private readonly Conversation _conversation = new()
+    {
+        AiKey = "yoda-ai-key-demo",
+    };
+
+    private ChatWindow? _chatWindow;
+    private bool _darkMode;
+    private bool _isWaitingForReply;
+
+    protected override void OnInitialized()
+    {
+        _conversation.AddMessage(new Message
+        {
+            Content = "Hello! I'm YodaPhone AI. How can I help with your account today?",
+            MessageId = 1,
+            DateTime = DateTime.Now,
+            Status = "delivered",
+            Sender = "yoda_ai_bot_01"
+        });
+    }
+
+    private async Task HandleUserMessageSent(string text)
+    {
+        if (string.IsNullOrWhiteSpace(text) || _isWaitingForReply)
+        {
+            return;
+        }
+
+        var userMessage = new Message
+        {
+            Content = text.Trim(),
+            MessageId = _conversation.AllMessages.Count + 1,
+            DateTime = DateTime.Now,
+            Status = "sent",
+            Sender = "user"
+        };
+
+        _conversation.AddMessage(userMessage);
+        _isWaitingForReply = true;
+        StateHasChanged();
+        await ScrollChatToBottom();
+
+        try
+        {
+            var reply = await ChatAiService.SendMessageAsync(userMessage.Content);
+            reply.MessageId = _conversation.AllMessages.Count + 1;
+            _conversation.AddMessage(reply);
+        }
+        finally
+        {
+            _isWaitingForReply = false;
+            StateHasChanged();
+            await ScrollChatToBottom();
+        }
+    }
+
+    private void StartNewChat()
+    {
+        _conversation.AllMessages.Clear();
+        _conversation.TokensUsed = 0;
+        OnInitialized();
+    }
+
+    private void ToggleDarkMode()
+    {
+        _darkMode = !_darkMode;
+    }
+
+    private void ShowHelp()
+    {
+        _conversation.AddMessage(new Message
+        {
+            Content = "Need help? Ask me about billing, plans, device support or outages — or type \"agent\" to reach a human specialist.",
+            MessageId = _conversation.AllMessages.Count + 1,
+            DateTime = DateTime.Now,
+            Status = "delivered",
+            Sender = "yoda_ai_bot_01"
+        });
+    }
+
+    private async Task ScrollChatToBottom()
+    {
+        if (_chatWindow is not null)
+        {
+            await _chatWindow.ScrollToBottomAsync();
+        }
+    }
+}

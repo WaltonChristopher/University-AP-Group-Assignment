@@ -24,6 +24,10 @@ public interface IChatAgent
     /// <exception cref="InvalidOperationException">
     /// Thrown when the response is empty or null.
     /// </exception>
+    /// <exception cref="ChatAgentException">
+    /// Thrown when an external provider fails. Display its Message as an error; never display
+    /// its diagnostic details or treat the failure as a successful assistant reply.
+    /// </exception>
     Task<AgentChatResponse> GetReplyAsync(
         IReadOnlyList<ChatMessage> history,
         CancellationToken cancellationToken

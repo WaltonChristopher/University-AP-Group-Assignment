@@ -1,6 +1,5 @@
 using Yodaphone.Web.Components;
-
-namespace Yodaphone.Web;
+using Yodaphone.Web.Services;
 
 public static class Program
 {
@@ -11,6 +10,7 @@ public static class Program
         // Add services to the container.
         builder.Services.AddRazorComponents()
             .AddInteractiveServerComponents();
+        builder.Services.AddScoped<IChatAiService, MockChatAiService>();
 
         var app = builder.Build();
 
