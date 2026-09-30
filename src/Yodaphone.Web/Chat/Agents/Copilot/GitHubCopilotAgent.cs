@@ -1,8 +1,7 @@
 using GitHub.Copilot;
-using Yodaphone.Web.Chat.Agents.Copilot;
 using Yodaphone.Web.Domain;
 
-namespace Yodaphone.Web.Chat.Agents;
+namespace Yodaphone.Web.Chat.Agents.Copilot;
 
 /// <summary>
 /// An implementation of ChatAgentBase that integrates with the GitHub Copilot service.

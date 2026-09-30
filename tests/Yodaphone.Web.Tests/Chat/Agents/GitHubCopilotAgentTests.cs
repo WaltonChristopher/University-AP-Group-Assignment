@@ -1,6 +1,6 @@
 using GitHub.Copilot;
 using Xunit;
-using Yodaphone.Web.Chat.Agents;
+using Yodaphone.Web.Chat.Agents.Copilot;
 using Yodaphone.Web.Domain;
 using Yodaphone.Web.Tests.Chat.Agents.TestDoubles;
 
