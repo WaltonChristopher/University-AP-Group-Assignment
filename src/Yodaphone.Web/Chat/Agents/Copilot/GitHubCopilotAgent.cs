@@ -1,0 +1,140 @@
+using GitHub.Copilot;
+using Yodaphone.Web.Domain;
+
+namespace Yodaphone.Web.Chat.Agents.Copilot;
+
+/// <summary>
+/// An implementation of ChatAgentBase that integrates with the GitHub Copilot service.
+/// </summary>
+/// <remarks>
+/// The agent controls the request workflow and validates the reply. Its factory supplies
+/// replaceable client and session interfaces so tests can exercise that workflow without
+/// starting Copilot. These dependencies are specific to this agent; OfflineChatAgent
+/// does not need them.
+/// </remarks>
+public sealed class GitHubCopilotAgent : ChatAgentBase
+{
+    private readonly ICopilotClientFactory clientFactory;
+
+    /// <summary>
+    /// Creates an agent backed by the Copilot SDK.
+    /// </summary>
+    public GitHubCopilotAgent() : this(new CopilotClientFactory())
+    {
+    }
+
+    /// <summary>
+    /// Creates an agent with a replaceable client factory for dependency injection and testing.
+    /// </summary>
+    /// <param name="clientFactory">Creates a fresh client for each request.</param>
+    public GitHubCopilotAgent(ICopilotClientFactory clientFactory)
+    {
+        ArgumentNullException.ThrowIfNull(clientFactory);
+        this.clientFactory = clientFactory;
+    }
+
+    // System prompt to guide the behavior of the Copilot agent.
+    private const string SystemPrompt = """
+        You are Yodaphone, a helpful customer-service assistant.
+        Be concise, polite, and clear.
+        Do not request passwords, payment-card details, or other sensitive data.
+        If you cannot safely help, explain that a human support colleague can assist.
+    """;
+
+    /// <summary>
+    /// Gets a reply from the GitHub Copilot service based on the chat history.
+    /// </summary>
+    /// <param name="history">The chat history.</param>
+    /// <param name="cancellationToken">The cancellation token.</param>
+    /// <returns>The agent's response.</returns>
+    /// <exception cref="InvalidOperationException">Thrown when the Copilot response is empty or null.</exception>
+    /// <exception cref="OperationCanceledException">Thrown when the caller cancels the request.</exception>
+    /// <exception cref="ChatAgentException">Thrown with a safe message when the SDK interaction fails.</exception>
+    protected override async Task<AgentChatResponse> GetReplyCoreAsync(
+        IReadOnlyList<ChatMessage> history,
+        CancellationToken cancellationToken
+    )
+    {
+        string? content;
+        try
+        {
+            // The helper owns the SDK resources, so this also catches failures during disposal.
+            content = await GetCopilotContentAsync(history, cancellationToken);
+        }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+            // A caller cancelling their request is not a service failure.
+            throw;
+        }
+        catch (Exception exception)
+        {
+            throw new ChatAgentException(exception);
+        }
+
+        // Keep response validation outside the SDK catch block to preserve IChatAgent's contract.
+        if (string.IsNullOrWhiteSpace(content))
+        {
+            throw new InvalidOperationException("The Copilot response was empty or null.");
+        }
+
+        return new AgentChatResponse { Content = content };
+    }
+
+    private async Task<string?> GetCopilotContentAsync(
+        IReadOnlyList<ChatMessage> history,
+        CancellationToken cancellationToken)
+    {
+        // Initialize the runtime directory for the Copilot client
+        var runtimeDirectory = Path.Combine(Path.GetTempPath(), "Yodaphone-Copilot", "temp runtime"); //TODO: replace temp runtime with conversation ID
+
+        // Create a client per request, rather than sharing an active client between requests.
+        // The factory chooses the implementation; this method owns its lifetime.
+        await using var copilotClient = clientFactory.Create(new CopilotClientOptions
+        {
+            BaseDirectory = runtimeDirectory,
+            Mode = CopilotClientMode.Empty // Use the empty mode to avoid unnecessary features
+        });
+
+        await copilotClient.StartAsync(cancellationToken);
+
+        // Declare the session after the client so await using disposes the session first.
+        // Both are cleaned up when the method exits, including after a failure or cancellation.
+        await using var session = await copilotClient.CreateSessionAsync(new SessionConfig
+        {
+            ClientName = "Yodaphone-web",
+            Model = "auto",
+            AvailableTools = [], // No tools available for simplicity
+            InfiniteSessions = new InfiniteSessionConfig
+            {
+                Enabled = false
+            },
+            SystemMessage = new SystemMessageConfig
+            {
+                Mode = SystemMessageMode.Append,
+                Content = SystemPrompt
+            }
+        }, cancellationToken);
+
+        // Send the message to the Copilot session and wait for a response
+        var response = await session.SendAndWaitAsync(
+            new MessageOptions
+            {
+                Prompt = BuildTranscript(history)
+            },
+            cancellationToken: cancellationToken
+        );
+
+        return response?.Data.Content;
+    }
+
+    /// <summary>
+    /// Builds a transcript from the chat history to provide context for the Copilot session.
+    /// </summary>
+    /// <param name="history"></param>
+    /// <returns></returns>
+    internal static string BuildTranscript(IEnumerable<ChatMessage> history)
+    {
+        var lines = history.Select(msg => $"{msg.Role}: {msg.Content}");
+        return $"{string.Join(Environment.NewLine, lines)}{Environment.NewLine}Yodaphone assistant: ";
+    }
+}

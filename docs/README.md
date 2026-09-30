@@ -4,6 +4,27 @@
 
 This project is part of an assignment for Cranfield University Digital and Technology Solutions apprentices. A detailed description of the task, given in the assignment brief, can be found under the heading `The Assignment Task`.
 
+## Dependencies
+
+This project requires the following dependencies:
+
+| Dependency | Version |
+| --- | --- |
+| .NET SDK | 9.0 |
+| ASP.NET Core | 9.0 |
+| Blazor | 9.0 |
+| Docker | 24.0 or later |
+| Docker Compose | 2.20 or later |
+| NuGet packages | Versions pinned in the project `.csproj` files |
+
+The .NET, ASP.NET Core, and Blazor versions must match the SDK specified by
+`global.json` (if present). NuGet package versions are managed centrally by the
+solution/project files and should be restored with `dotnet restore Yodaphone.sln`.
+
+### Note
+
+The Copilot SDK version as specified in `Yodaphone.Web.csproj` is `1.0.13-preview.2`. This is required as it contains a workaround for a known dotnet issue on MacOS (https://github.com/dotnet/sdk/issues/54309). As this is a preview version, any upgrades will need to be checked for compatibility before implementation.
+
 ## Developer Setup
 
 For ease of setup and consistency we are using a Docker development container. 
@@ -90,11 +111,8 @@ Finally you can run the solution: `dotnet watch --project src/Yodaphone.Web --no
 
 ## AI Use Acknowledgement
 
-ChatGPT 5.6 Sol (OpenAI, https://chatgpt.com/) 
+ChatGPT 5.6 Sol, Terra, and ChatGPT 6 Astra (OpenAI, https://chatgpt.com/). Used for code generation and to assist with code reviews.
 
+GitHub Copilot (auto/balanced model selection) (GitHub, https://github.com/features/copilot). Used for code completion within VSCode and for pull requests in GitHub.
 
-ChatGPT 5.6 Sol has been used in the initial code creation of this project. That includes:
-- Setting up the default .NET dev container
-- Establishing the default ASP.NET / Blazor project
-
-All AI generated content has been subject to human review.
+Claude Sonnet 5.5, Haiku 4.5 (Anthropic, https://claude.ai). Used as a starting point for implementing UI wireframes in Blazor.
