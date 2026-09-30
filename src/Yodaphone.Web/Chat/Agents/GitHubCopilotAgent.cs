@@ -1,4 +1,5 @@
 using GitHub.Copilot;
+using Yodaphone.Web.Chat.Agents.Copilot;
 using Yodaphone.Web.Domain;
 
 namespace Yodaphone.Web.Chat.Agents;
@@ -6,8 +7,32 @@ namespace Yodaphone.Web.Chat.Agents;
 /// <summary>
 /// An implementation of ChatAgentBase that integrates with the GitHub Copilot service.
 /// </summary>
+/// <remarks>
+/// The agent controls the request workflow and validates the reply. Its factory supplies
+/// replaceable client and session interfaces so tests can exercise that workflow without
+/// starting Copilot. These dependencies are specific to this agent; OfflineChatAgent
+/// does not need them.
+/// </remarks>
 public sealed class GitHubCopilotAgent : ChatAgentBase
 {
+    private readonly ICopilotClientFactory clientFactory;
+
+    /// <summary>
+    /// Creates an agent backed by the Copilot SDK.
+    /// </summary>
+    public GitHubCopilotAgent() : this(new CopilotClientFactory())
+    {
+    }
+
+    /// <summary>
+    /// Creates an agent with a replaceable client factory for dependency injection and testing.
+    /// </summary>
+    /// <param name="clientFactory">Creates a fresh client for each request.</param>
+    public GitHubCopilotAgent(ICopilotClientFactory clientFactory)
+    {
+        ArgumentNullException.ThrowIfNull(clientFactory);
+        this.clientFactory = clientFactory;
+    }
 
     // System prompt to guide the behavior of the Copilot agent.
     private const string SystemPrompt = """
@@ -34,8 +59,9 @@ public sealed class GitHubCopilotAgent : ChatAgentBase
         // Initialize the runtime directory for the Copilot client
         var runtimeDirectory = Path.Combine(Path.GetTempPath(), "Yodaphone-Copilot", "temp runtime"); //TODO: replace temp runtime with conversation ID
 
-        // Initialize the Copilot client with the runtime directory
-        await using var copilotClient = new CopilotClient(new CopilotClientOptions
+        // Create a client per request, rather than sharing an active client between requests.
+        // The factory chooses the implementation; this method owns its lifetime.
+        await using var copilotClient = clientFactory.Create(new CopilotClientOptions
         {
             BaseDirectory = runtimeDirectory,
             Mode = CopilotClientMode.Empty // Use the empty mode to avoid unnecessary features
@@ -43,7 +69,8 @@ public sealed class GitHubCopilotAgent : ChatAgentBase
 
         await copilotClient.StartAsync(cancellationToken);
 
-        // Create a session with the Copilot client
+        // Declare the session after the client so await using disposes the session first.
+        // Both are cleaned up when the method exits, including after a failure or cancellation.
         await using var session = await copilotClient.CreateSessionAsync(new SessionConfig
         {
             ClientName = "Yodaphone-web",
