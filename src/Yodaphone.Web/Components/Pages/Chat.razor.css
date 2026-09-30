@@ -1,0 +1,137 @@
+.yp-shell {
+    display: flex;
+    flex-direction: column;
+    height: calc(100dvh - 7.5rem);
+    min-height: 420px;
+    min-width: 0;
+    overflow: hidden;
+    background: var(--yp-surface-page);
+    color: var(--yp-text-on-chrome);
+    border-radius: var(--yp-radius-lg);
+}
+
+.yp-header {
+    display: flex;
+    align-items: center;
+    flex: 0 0 auto;
+    gap: 1rem;
+    min-height: var(--yp-header-height);
+    padding: 0.75rem 1.25rem;
+    background: var(--yp-surface-chrome);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.yp-header__brand,
+.yp-header__user {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+}
+
+.yp-brand-name {
+    font-family: var(--yp-font-display);
+    font-size: 1.1rem;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.yp-brand-name em {
+    color: var(--yp-signal-500);
+    font-style: normal;
+}
+
+.yp-logo,
+.yp-avatar {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+    width: 36px;
+    height: 36px;
+    background: var(--yp-teal-600);
+    border-radius: var(--yp-radius-sm);
+    font-family: var(--yp-font-display);
+    font-weight: 600;
+}
+
+.yp-avatar {
+    background: var(--yp-signal-600);
+    border-radius: 50%;
+}
+
+.yp-header__spacer {
+    flex: 1;
+}
+
+.yp-header__user-label {
+    font-size: 0.85rem;
+    white-space: nowrap;
+}
+
+.yp-header__new-chat:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.yp-body {
+    display: flex;
+    flex: 1;
+    min-height: 0;
+    min-width: 0;
+}
+
+.yp-main {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    gap: 1rem;
+    min-height: 0;
+    min-width: 0;
+    padding: 1rem;
+}
+
+.yp-chat-error {
+    padding: 0.75rem 1rem;
+    color: var(--yp-text-on-chat);
+    background: var(--yp-surface-chat);
+    border-left: 4px solid var(--yp-danger);
+}
+
+@media (max-width: 1000px) {
+    .yp-header__user-label {
+        display: none;
+    }
+}
+
+@media (max-width: 720px) {
+    .yp-shell {
+        height: calc(100dvh - 9rem);
+        min-height: 320px;
+    }
+
+    .yp-header {
+        gap: 0.5rem;
+        padding: 0.65rem;
+    }
+
+    .yp-header__brand {
+        flex: 1;
+    }
+
+    .yp-brand-name {
+        font-size: 0.95rem;
+    }
+
+    .yp-header__spacer {
+        display: none;
+    }
+
+    .yp-logo {
+        display: none;
+    }
+
+    .yp-main {
+        gap: 0.65rem;
+        padding: 0.65rem;
+    }
+}

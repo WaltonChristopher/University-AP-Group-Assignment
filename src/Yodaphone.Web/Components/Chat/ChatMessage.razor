@@ -1,19 +1,26 @@
-@using Yodaphone.Web.Models;
+@using Yodaphone.Web.Domain
+@using DomainMessage = Yodaphone.Web.Domain.ChatMessage
 
-<div class="yp-message-row @(Message.IsFromBot ? "yp-message-row--bot" : "yp-message-row--user")">
-    <div class="yp-bubble @(Message.IsFromBot ? "yp-bubble--bot" : "yp-bubble--user")">
-        <span class="yp-bubble__sender">@(Message.IsFromBot ? "YodaPhone AI" : "You")</span>
-        <p class="yp-bubble__content">@Message.Content</p>
+<div class="yp-message-row @(IsFromAgent ? "yp-message-row--bot" : "yp-message-row--user")">
+    <div class="yp-bubble @(IsFromAgent ? "yp-bubble--bot" : "yp-bubble--user")">
+        <span class="yp-bubble__sender">@(IsFromAgent ? "YodaPhone AI" : "You")</span>
+        <p class="yp-bubble__content">@(Message?.Content ?? PendingContent)</p>
         <div class="yp-bubble__meta">
-            <span>@Message.DateTime.ToString("h:mm tt")</span>
-            @if (!Message.IsFromBot)
+            @if (Message is not null)
             {
-                <span class="yp-bubble__status">@Message.Status</span>
+                <span>@Message.SentAt.ToLocalTime().ToString("h:mm tt")</span>
+            }
+            @if (PendingContent is not null)
+            {
+                <span class="yp-bubble__status">Sending…</span>
             }
         </div>
     </div>
 </div>
 
 @code {
-    [Parameter, EditorRequired] public Message Message { get; set; } = null!;
+    [Parameter] public DomainMessage? Message { get; set; }
+    [Parameter] public string? PendingContent { get; set; }
+
+    private bool IsFromAgent => Message?.Role == MessageRole.Assistant;
 }
