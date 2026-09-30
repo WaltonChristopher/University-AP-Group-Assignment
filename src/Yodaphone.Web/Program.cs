@@ -13,6 +13,8 @@ public static class Program
         builder.Services.AddRazorComponents()
             .AddInteractiveServerComponents();
         builder.Services.AddScoped<IChatService, ChatService>();
+        builder.Services.Configure<CopilotOptions>(
+            builder.Configuration.GetSection(CopilotOptions.SectionName));
 
         // Register the chat agent based on configuration.
         var agentName = builder.Configuration["Chat:Agent"] ?? "Offline";
