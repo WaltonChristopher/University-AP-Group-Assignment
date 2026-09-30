@@ -10,7 +10,7 @@ public static class Program
         // Add services to the container.
         builder.Services.AddRazorComponents()
             .AddInteractiveServerComponents();
-        builder.Services.AddScoped<IChatAiService, MockChatAiService>();
+        builder.Services.AddScoped<ChatService, MockChatAiService>();
 
         var app = builder.Build();
 
