@@ -1,4 +1,5 @@
 using GitHub.Copilot;
+using Microsoft.Extensions.Options;
 
 namespace Yodaphone.Web.Chat.Agents.Copilot;
 
@@ -12,8 +13,39 @@ namespace Yodaphone.Web.Chat.Agents.Copilot;
 /// </remarks>
 public sealed class CopilotClientFactory : ICopilotClientFactory
 {
+    private readonly string? gitHubToken;
+
+    /// <summary>
+    /// Creates a factory using the server-side Copilot configuration.
+    /// </summary>
+    public CopilotClientFactory(IOptions<CopilotOptions> options)
+        : this(options?.Value.GitHubToken)
+    {
+    }
+
+    /// <summary>
+    /// Creates a factory that uses any locally persisted Copilot or GitHub CLI login.
+    /// </summary>
+    public CopilotClientFactory()
+        : this((string?)null)
+    {
+    }
+
+    internal CopilotClientFactory(string? gitHubToken)
+    {
+        this.gitHubToken = string.IsNullOrWhiteSpace(gitHubToken) ? null : gitHubToken;
+    }
+
     public ICopilotClient Create(CopilotClientOptions options)
     {
+        ArgumentNullException.ThrowIfNull(options);
+
+        // This credential is applied inside the server process, never forwarded from the
+        // browser. When no token is configured, retain the SDK's local-login behaviour for
+        // developer machines (for example, a previously authenticated GitHub CLI).
+        options.GitHubToken = gitHubToken;
+        options.UseLoggedInUser = gitHubToken is null;
+
         // Construction does not start the client; the agent explicitly awaits StartAsync.
         return new ClientAdapter(new CopilotClient(options));
     }

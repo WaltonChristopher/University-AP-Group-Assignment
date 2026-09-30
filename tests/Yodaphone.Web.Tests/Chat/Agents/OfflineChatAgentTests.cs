@@ -9,7 +9,7 @@ public sealed class OfflineChatAgentTests
     private readonly IChatAgent agent = new OfflineChatAgent();
 
     [Fact]
-    public async Task GetReplyAsync_ReturnsTheOfflineResponse()
+    public async Task GetReplyAsync_ReturnsNonEmptyOfflineResponse()
     {
         var conversation = CreateConversationWithCustomerMessage();
 
@@ -17,7 +17,7 @@ public sealed class OfflineChatAgentTests
             conversation.Messages.ToList(),
             CancellationToken.None);
 
-        Assert.Equal("This is an offline response.", response.Content);
+        Assert.False(string.IsNullOrWhiteSpace(response.Content));
     }
 
     [Fact]

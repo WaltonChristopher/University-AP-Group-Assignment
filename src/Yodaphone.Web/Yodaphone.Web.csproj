@@ -5,6 +5,7 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <BlazorDisableThrowNavigationException>true</BlazorDisableThrowNavigationException>
+    <UserSecretsId>yodaphone-web-5b51b329-0c43-4f79-bb9e-d5f8f3351b50</UserSecretsId>
     
     <!-- Workaround for dotnet/sdk#54309 on Linux and macOS -->
     <IntermediateOutputPath>obj/$(Configuration)/</IntermediateOutputPath>
