@@ -1,3 +1,5 @@
+@using Yodaphone.Web.Models;
+
 <div class="yp-message-row @(Message.IsFromBot ? "yp-message-row--bot" : "yp-message-row--user")">
     <div class="yp-bubble @(Message.IsFromBot ? "yp-bubble--bot" : "yp-bubble--user")">
         <span class="yp-bubble__sender">@(Message.IsFromBot ? "YodaPhone AI" : "You")</span>
