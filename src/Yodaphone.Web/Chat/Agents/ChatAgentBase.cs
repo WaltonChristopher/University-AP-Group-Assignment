@@ -25,6 +25,8 @@ public abstract class ChatAgentBase : IChatAgent
             throw new InvalidOperationException("The agent response was empty or null.");
         }
 
+        ChatContentSanitizer.EnsureSafeAgentResponse(response.Content);
+
         return response;
     }
 
