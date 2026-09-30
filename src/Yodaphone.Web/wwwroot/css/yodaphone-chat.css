@@ -7,20 +7,31 @@
 
 :root {
   /* Core palette */
-  --yp-teal-900: #0B2B36;   /* deepest chrome — sidebar, header */
-  --yp-teal-800: #10333F;   /* page background */
-  --yp-teal-700: #14505F;   /* hover / pressed chrome */
-  --yp-teal-600: #1C6E88;   /* primary action, AI bubble */
-  --yp-teal-500: #2C8BA6;   /* focus rings, links */
-  --yp-signal-500: #3FA98F; /* user bubble — a warmer green-teal "you" signal */
+  --yp-teal-900: #0B2B36;
+  /* deepest chrome — sidebar, header */
+  --yp-teal-800: #10333F;
+  /* page background */
+  --yp-teal-700: #14505F;
+  /* hover / pressed chrome */
+  --yp-teal-600: #1C6E88;
+  /* primary action, AI bubble */
+  --yp-teal-500: #2C8BA6;
+  /* focus rings, links */
+  --yp-signal-500: #3FA98F;
+  /* user bubble — a warmer green-teal "you" signal */
   --yp-signal-600: #2F8A73;
 
-  --yp-mist-100: #F3F5F6;   /* lightest surface */
-  --yp-mist-200: #E4E8EA;   /* chat pane background */
-  --yp-mist-300: #C9D1D4;   /* borders on light surfaces */
+  --yp-mist-100: #F3F5F6;
+  /* lightest surface */
+  --yp-mist-200: #E4E8EA;
+  /* chat pane background */
+  --yp-mist-300: #C9D1D4;
+  /* borders on light surfaces */
 
-  --yp-ink-900: #12262B;    /* body text on light surfaces */
-  --yp-ink-050: #F6F8F9;    /* body text on dark surfaces */
+  --yp-ink-900: #12262B;
+  /* body text on light surfaces */
+  --yp-ink-050: #F6F8F9;
+  /* body text on dark surfaces */
 
   --yp-danger: #C0524A;
 
@@ -47,7 +58,7 @@
 
 /* Dark mode: chat pane inverts to a near-black "console" surface while the
    teal chrome deepens further, keeping the same relative contrast. */
-.yp-app-root.dark {
+.yp-shell.dark {
   --yp-surface-chrome: #071A21;
   --yp-surface-chrome-hover: #0F2A33;
   --yp-surface-page: #071A21;
@@ -61,7 +72,8 @@
   box-sizing: border-box;
 }
 
-html, body {
+html,
+body {
   height: 100%;
   margin: 0;
   padding: 0;
