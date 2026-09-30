@@ -1,5 +1,6 @@
 using GitHub.Copilot;
 using Xunit;
+using Yodaphone.Web.Chat.Agents;
 using Yodaphone.Web.Chat.Agents.Copilot;
 using Yodaphone.Web.Domain;
 using Yodaphone.Web.Tests.Chat.Agents.TestDoubles;
@@ -85,20 +86,57 @@ public sealed class GitHubCopilotAgentTests
     }
 
     [Theory]
-    [InlineData("start")]
-    [InlineData("create-session")]
-    [InlineData("send")]
-    public async Task GetReplyAsync_WithSdkFailure_PropagatesAndDisposesAcquiredResources(string stage)
+    [InlineData("start", "timeout")]
+    [InlineData("create-session", "timeout")]
+    [InlineData("send", "timeout")]
+    [InlineData("start", "connection")]
+    [InlineData("create-session", "connection")]
+    [InlineData("send", "connection")]
+    [InlineData("start", "unexpected")]
+    [InlineData("create-session", "unexpected")]
+    [InlineData("send", "unexpected")]
+    [InlineData("create-client", "unexpected")]
+    [InlineData("dispose-session", "unexpected")]
+    [InlineData("dispose-client", "unexpected")]
+    public async Task GetReplyAsync_WithSdkFailure_TranslatesAndDisposesAcquiredResources(
+        string stage,
+        string failureKind)
     {
-        // Run this scenario at each SDK step. Later steps must not execute after a failure.
-        var failure = new TimeoutException("SDK timed out.");
+        // Only the fixed outer message should reach a user; preserve SDK details for diagnostics.
+        const string diagnosticDetail = "Internal endpoint and credential details";
+        Exception failure = failureKind switch
+        {
+            "timeout" => new TimeoutException(diagnosticDetail),
+            "connection" => new IOException(diagnosticDetail),
+            _ => new InvalidOperationException(diagnosticDetail)
+        };
         factory.FailureStage = stage;
         factory.Failure = failure;
 
-        var exception = await Assert.ThrowsAsync<TimeoutException>(
+        var exception = await Assert.ThrowsAsync<ChatAgentException>(
             () => agent.GetReplyAsync(CreateHistory(), CancellationToken.None));
 
-        Assert.Same(failure, exception);
+        Assert.Equal("The chat service is temporarily unavailable. Please try again.", exception.Message);
+        Assert.DoesNotContain(diagnosticDetail, exception.Message);
+        Assert.Same(failure, exception.InnerException);
+        AssertCallsThroughFailure(stage);
+    }
+
+    [Theory]
+    [InlineData("start")]
+    [InlineData("create-session")]
+    [InlineData("send")]
+    public async Task GetReplyAsync_WithSdkCancellationWithoutCallerCancellation_ReportsServiceFailure(string stage)
+    {
+        var failure = new OperationCanceledException("The SDK cancelled its internal operation.");
+        factory.FailureStage = stage;
+        factory.Failure = failure;
+
+        var exception = await Assert.ThrowsAsync<ChatAgentException>(
+            () => agent.GetReplyAsync(CreateHistory(), CancellationToken.None));
+
+        Assert.Equal("The chat service is temporarily unavailable. Please try again.", exception.Message);
+        Assert.Same(failure, exception.InnerException);
         AssertCallsThroughFailure(stage);
     }
 
@@ -188,9 +226,11 @@ public sealed class GitHubCopilotAgentTests
         // A send failure has both resources, so the session must be disposed before the client.
         string[] expected = stage switch
         {
+            "create-client" => ["create-client"],
             "start" => ["create-client", "start", "dispose-client"],
             "create-session" => ["create-client", "start", "create-session", "dispose-client"],
-            "send" => ["create-client", "start", "create-session", "send", "dispose-session", "dispose-client"],
+            "send" or "dispose-session" or "dispose-client" =>
+                ["create-client", "start", "create-session", "send", "dispose-session", "dispose-client"],
             _ => throw new ArgumentException("Unknown SDK stage.", nameof(stage))
         };
         Assert.Equal(expected, factory.Calls);

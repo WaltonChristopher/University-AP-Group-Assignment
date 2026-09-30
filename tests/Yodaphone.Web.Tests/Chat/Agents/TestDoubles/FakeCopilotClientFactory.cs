@@ -18,6 +18,7 @@ internal sealed class FakeCopilotClientFactory : ICopilotClientFactory
 
     // Controls: a test can choose a reply, fail one SDK stage, or cancel during that stage.
     // Stage names match the recorded calls: "start", "create-session", or "send".
+    // Failures can also be injected at "create-client", "dispose-session", or "dispose-client".
     public AssistantMessageEvent? Response { get; set; } = CreateResponse("Copilot reply");
     public string? FailureStage { get; set; }
     public Exception? Failure { get; set; }
@@ -28,6 +29,7 @@ internal sealed class FakeCopilotClientFactory : ICopilotClientFactory
     {
         Calls.Add("create-client");
         Options = options;
+        ThrowIfConfigured("create-client");
         return new FakeClient(this);
     }
 
@@ -56,6 +58,11 @@ internal sealed class FakeCopilotClientFactory : ICopilotClientFactory
             CancelRequest!();
         }
         cancellationToken.ThrowIfCancellationRequested();
+        ThrowIfConfigured(stage);
+    }
+
+    private void ThrowIfConfigured(string stage)
+    {
         if (stage == FailureStage)
         {
             // Throw the supplied instance so the test can check that the agent preserves it.
@@ -84,6 +91,7 @@ internal sealed class FakeCopilotClientFactory : ICopilotClientFactory
         public ValueTask DisposeAsync()
         {
             owner.Calls.Add("dispose-client");
+            owner.ThrowIfConfigured("dispose-client");
             return ValueTask.CompletedTask;
         }
     }
@@ -103,6 +111,7 @@ internal sealed class FakeCopilotClientFactory : ICopilotClientFactory
         {
             // There is no external resource to release; recording disposal lets tests verify ownership.
             owner.Calls.Add("dispose-session");
+            owner.ThrowIfConfigured("dispose-session");
             return ValueTask.CompletedTask;
         }
     }

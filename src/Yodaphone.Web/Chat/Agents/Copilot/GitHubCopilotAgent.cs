@@ -48,12 +48,41 @@ public sealed class GitHubCopilotAgent : ChatAgentBase
     /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns>The agent's response.</returns>
     /// <exception cref="InvalidOperationException">Thrown when the Copilot response is empty or null.</exception>
-    /// <exception cref="OperationCanceledException">Thrown when the operation is canceled.</exception>
-    /// <exception cref="Exception">Thrown for other unexpected errors during the Copilot interaction.</exception>
+    /// <exception cref="OperationCanceledException">Thrown when the caller cancels the request.</exception>
+    /// <exception cref="ChatAgentException">Thrown with a safe message when the SDK interaction fails.</exception>
     protected override async Task<AgentChatResponse> GetReplyCoreAsync(
         IReadOnlyList<ChatMessage> history,
         CancellationToken cancellationToken
     )
+    {
+        string? content;
+        try
+        {
+            // The helper owns the SDK resources, so this also catches failures during disposal.
+            content = await GetCopilotContentAsync(history, cancellationToken);
+        }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+            // A caller cancelling their request is not a service failure.
+            throw;
+        }
+        catch (Exception exception)
+        {
+            throw new ChatAgentException(exception);
+        }
+
+        // Keep response validation outside the SDK catch block to preserve IChatAgent's contract.
+        if (string.IsNullOrWhiteSpace(content))
+        {
+            throw new InvalidOperationException("The Copilot response was empty or null.");
+        }
+
+        return new AgentChatResponse { Content = content };
+    }
+
+    private async Task<string?> GetCopilotContentAsync(
+        IReadOnlyList<ChatMessage> history,
+        CancellationToken cancellationToken)
     {
         // Initialize the runtime directory for the Copilot client
         var runtimeDirectory = Path.Combine(Path.GetTempPath(), "Yodaphone-Copilot", "temp runtime"); //TODO: replace temp runtime with conversation ID
@@ -95,18 +124,7 @@ public sealed class GitHubCopilotAgent : ChatAgentBase
             cancellationToken: cancellationToken
         );
 
-        var content = response?.Data.Content;
-
-        // Check the response has content
-        if (string.IsNullOrWhiteSpace(content))
-        {
-            throw new InvalidOperationException("The Copilot response was empty or null.");
-        }
-
-        return new AgentChatResponse
-        {
-            Content = content
-        };
+        return response?.Data.Content;
     }
 
     /// <summary>
