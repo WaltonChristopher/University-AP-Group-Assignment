@@ -224,16 +224,27 @@ Catch exceptions only when you can handle them, add useful context, or show a sa
 ```csharp
 try
 {
-    await chatAgent.SendAsync(message, cancellationToken);
+    var response = await chatAgent.GetReplyAsync(history, cancellationToken);
+    // Add response.Content to the conversation only after a successful call.
 }
-catch (HttpRequestException exception)
+catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
 {
-    logger.LogError(exception, "The chat service could not be reached");
-    errorMessage = "The service is temporarily unavailable. Please try again.";
+    // The caller cancelled: stop the loading state without reporting a service failure.
+}
+catch (ChatAgentException exception)
+{
+    errorMessage = exception.Message; // Fixed, safe text defined by ChatAgentException.
 }
 ```
 
 Do not show exception details, stack traces, credentials, or customer data to users.
+
+`ChatAgentException` is in `Yodaphone.Web.Chat.Agents`. The Copilot agent translates SDK
+failures into this exception and retains the original failure in `InnerException` for
+server-side diagnostics. Never render `ToString()` or `InnerException`, and keep diagnostic
+logs access-controlled. Present the safe message as a UI error, not as an assistant reply.
+The example above is guidance for the future chat caller; a chat UI is not yet wired up.
+Invalid input and empty replies still use the validation exceptions documented on `IChatAgent`.
 
 ## Razor and Blazor essentials
 
