@@ -1,0 +1,43 @@
+<aside class="yp-sidebar">
+    <nav class="yp-sidebar__nav">
+        <button class="yp-sidebar__item yp-sidebar__item--active">
+            <span class="yp-sidebar__icon" aria-hidden="true">&#128337;</span>
+            Previous inquiries
+        </button>
+
+        @foreach (var inquiry in PastInquiries)
+        {
+            <button class="yp-sidebar__inquiry" title="@inquiry">@inquiry</button>
+        }
+    </nav>
+
+    <div class="yp-sidebar__footer">
+        <button class="yp-sidebar__item" @onclick="OnHelpRequested">
+            <span class="yp-sidebar__icon" aria-hidden="true">&#63;</span>
+            Help
+        </button>
+
+        <button class="yp-sidebar__item yp-sidebar__item--toggle" @onclick="ToggleDarkMode">
+            <span class="yp-sidebar__icon" aria-hidden="true">@(DarkMode ? "\u2600" : "\u263D")</span>
+            @(DarkMode ? "Light mode" : "Dark mode")
+        </button>
+    </div>
+</aside>
+
+@code {
+    [Parameter] public bool DarkMode { get; set; }
+    [Parameter] public EventCallback OnDarkModeToggled { get; set; }
+    [Parameter] public EventCallback OnHelpRequested { get; set; }
+
+    private static readonly string[] PastInquiries =
+    {
+        "Billing question — Aug 12",
+        "SIM activation issue",
+        "Roaming plan upgrade"
+    };
+
+    private async Task ToggleDarkMode()
+    {
+        await OnDarkModeToggled.InvokeAsync();
+    }
+}

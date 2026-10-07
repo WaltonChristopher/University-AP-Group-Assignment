@@ -1,0 +1,51 @@
+<div class="yp-input-bar">
+    <textarea
+        class="yp-input-bar__field"
+        placeholder="Enter text here"
+        rows="1"
+        value="@_draft"
+        @oninput="OnDraftChanged"
+        @onkeydown="OnKeyDown"
+        disabled="@IsSending">
+    </textarea>
+
+    <button
+        class="yp-btn yp-btn--solid yp-input-bar__send"
+        @onclick="Send"
+        disabled="@(IsSending || string.IsNullOrWhiteSpace(_draft))">
+        @(IsSending ? "Sending…" : "Send")
+    </button>
+</div>
+
+@code {
+    [Parameter] public EventCallback<string> OnMessageSent { get; set; }
+    [Parameter] public bool IsSending { get; set; }
+
+    private string _draft = string.Empty;
+
+    private void OnDraftChanged(ChangeEventArgs e)
+    {
+        _draft = e.Value?.ToString() ?? string.Empty;
+    }
+
+    private async Task OnKeyDown(KeyboardEventArgs e)
+    {
+        // Enter sends; Shift+Enter inserts a newline.
+        if (e.Key == "Enter" && !e.ShiftKey)
+        {
+            await Send();
+        }
+    }
+
+    private async Task Send()
+    {
+        if (IsSending || string.IsNullOrWhiteSpace(_draft))
+        {
+            return;
+        }
+
+        var text = _draft;
+        _draft = string.Empty;
+        await OnMessageSent.InvokeAsync(text);
+    }
+}
