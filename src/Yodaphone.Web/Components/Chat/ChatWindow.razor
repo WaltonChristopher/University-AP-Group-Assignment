@@ -1,15 +1,21 @@
 @inject IJSRuntime JS
-@using Yodaphone.Web.Models;
+@using Yodaphone.Web.Domain
+@using DomainMessage = Yodaphone.Web.Domain.ChatMessage
 
 <section class="yp-chat-window" id="@_elementId">
-    @if (Messages.Count == 0)
+    @if (Messages.Count == 0 && PendingMessage is null)
     {
         <p class="yp-chat-window__empty">Send a message to start the conversation.</p>
     }
 
-    @foreach (var message in Messages)
+    @foreach (var message in Messages.Where(message => message.Role != MessageRole.System))
     {
-        <ChatMessage Message="message" />
+        <ChatMessage @key="message.Id" Message="message" />
+    }
+
+    @if (PendingMessage is not null)
+    {
+        <ChatMessage PendingContent="@PendingMessage" />
     }
 
     @if (IsBotTyping)
@@ -23,7 +29,8 @@
 </section>
 
 @code {
-    [Parameter] public List<Message> Messages { get; set; } = new();
+    [Parameter] public IReadOnlyCollection<DomainMessage> Messages { get; set; } = Array.Empty<DomainMessage>();
+    [Parameter] public string? PendingMessage { get; set; }
     [Parameter] public bool IsBotTyping { get; set; }
 
     private readonly string _elementId = $"yp-chat-window-{Guid.NewGuid():N}";

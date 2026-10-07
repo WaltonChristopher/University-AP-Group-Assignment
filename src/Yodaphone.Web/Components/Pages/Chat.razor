@@ -1,9 +1,12 @@
 @page "/chat"
 @using Yodaphone.Web.Components.Chat
-@using Yodaphone.Web.Models
+@using Yodaphone.Web.Domain
 @using Yodaphone.Web.Services
-@inject IChatAiService ChatAiService
-@inject IJSRuntime JS
+@using Yodaphone.Web.Chat.Agents
+@using DomainMessage = Yodaphone.Web.Domain.ChatMessage
+@implements IDisposable
+@inject IChatService ChatService
+@inject ILogger<Chat> Logger
 
 <PageTitle>YodaPhone AI — Chat</PageTitle>
 
@@ -15,7 +18,7 @@
             <span class="yp-brand-name">YodaPhone <em>AI</em></span>
         </div>
 
-        <button class="yp-btn yp-btn--ghost yp-header__new-chat" @onclick="StartNewChat">
+        <button class="yp-btn yp-btn--ghost yp-header__new-chat" @onclick="StartNewChat" disabled="@_isBusy">
             New chat
         </button>
 
@@ -28,20 +31,17 @@
     </header>
 
     <div class="yp-body">
-        <Sidebar
-            DarkMode="_darkMode"
-            OnDarkModeToggled="ToggleDarkMode"
-            OnHelpRequested="ShowHelp" />
+        <Sidebar DarkMode="_darkMode" OnDarkModeToggled="ToggleDarkMode" OnHelpRequested="ShowHelp" />
 
         <main class="yp-main">
-            <ChatWindow
-                @ref="_chatWindow"
-                Messages="_conversation.AllMessages"
-                IsBotTyping="_isWaitingForReply" />
+            <ChatWindow Messages="_messages" PendingMessage="@_pendingMessage" IsBotTyping="_isWaitingForReply" />
 
-            <ChatInput
-                OnMessageSent="HandleUserMessageSent"
-                IsSending="_isWaitingForReply" />
+            @if (_errorMessage is not null)
+            {
+                <div class="yp-chat-error" role="alert">@_errorMessage</div>
+            }
+
+            <ChatInput OnMessageSent="HandleUserMessageSent" IsSending="@(_isBusy || _conversation is null)" />
         </main>
     </div>
 </div>
@@ -50,91 +50,130 @@
     private const string UserName = "Alex Rivera";
     private string UserInitial => string.IsNullOrWhiteSpace(UserName) ? "?" : UserName[0].ToString();
 
-    private readonly Conversation _conversation = new()
-    {
-        AiKey = "yoda-ai-key-demo",
-    };
-
-    private ChatWindow? _chatWindow;
+    private Conversation? _conversation;
+    private IReadOnlyCollection<DomainMessage> _messages = Array.Empty<DomainMessage>();
+    private readonly CancellationTokenSource _lifetime = new();
+    private string? _pendingMessage;
+    private string? _errorMessage;
     private bool _darkMode;
+    private bool _isBusy;
     private bool _isWaitingForReply;
+    private bool _disposed;
 
-    protected override void OnInitialized()
-    {
-        _conversation.AddMessage(new Message
-        {
-            Content = "Hello! I'm YodaPhone AI. How can I help with your account today?",
-            MessageId = 1,
-            DateTime = DateTime.Now,
-            Status = "delivered",
-            Sender = "yoda_ai_bot_01"
-        });
-    }
+    protected override Task OnInitializedAsync() => StartNewChat();
 
-    private async Task HandleUserMessageSent(string text)
+    private Task HandleUserMessageSent(string text)
     {
-        if (string.IsNullOrWhiteSpace(text) || _isWaitingForReply)
+        if (string.IsNullOrWhiteSpace(text) || _conversation is null)
         {
-            return;
+            return Task.CompletedTask;
         }
 
-        var userMessage = new Message
-        {
-            Content = text.Trim(),
-            MessageId = _conversation.AllMessages.Count + 1,
-            DateTime = DateTime.Now,
-            Status = "sent",
-            Sender = "user"
-        };
-
-        _conversation.AddMessage(userMessage);
-        _isWaitingForReply = true;
-        StateHasChanged();
-        await ScrollChatToBottom();
-
-        try
-        {
-            var reply = await ChatAiService.SendMessageAsync(userMessage.Content);
-            reply.MessageId = _conversation.AllMessages.Count + 1;
-            _conversation.AddMessage(reply);
-        }
-        finally
-        {
-            _isWaitingForReply = false;
-            StateHasChanged();
-            await ScrollChatToBottom();
-        }
+        var conversationId = _conversation.Id.ToString();
+        return RunConversationOperation(
+            async () => { await ChatService.SendMessageAsync(conversationId, text.Trim(), _lifetime.Token); },
+            "Your message could not be completed. Please try again.",
+            pendingMessage: text.Trim());
     }
 
-    private void StartNewChat()
+    private Task StartNewChat() => RunConversationOperation(async () =>
     {
-        _conversation.AllMessages.Clear();
-        _conversation.TokensUsed = 0;
-        OnInitialized();
-    }
+        if (_conversation is not null)
+        {
+            await ChatService.CloseConversationAsync(_conversation.Id.ToString(), _lifetime.Token);
+            _conversation = null;
+            _messages = Array.Empty<DomainMessage>();
+        }
+
+        _conversation = await ChatService.StartConversationAsync(_lifetime.Token);
+        await ChatService.AddMessageAsync(
+            _conversation.Id.ToString(), MessageRole.Assistant,
+            "Hello! I'm YodaPhone AI. How can I help with your account today?", _lifetime.Token);
+    }, "A new chat could not be started. Please try again.");
 
     private void ToggleDarkMode()
     {
         _darkMode = !_darkMode;
     }
 
-    private void ShowHelp()
+    private Task ShowHelp()
     {
-        _conversation.AddMessage(new Message
+        if (_conversation is null)
         {
-            Content = "Need help? Ask me about billing, plans, device support or outages — or type \"agent\" to reach a human specialist.",
-            MessageId = _conversation.AllMessages.Count + 1,
-            DateTime = DateTime.Now,
-            Status = "delivered",
-            Sender = "yoda_ai_bot_01"
-        });
+            return Task.CompletedTask;
+        }
+
+        var conversationId = _conversation.Id.ToString();
+        return RunConversationOperation(async () =>
+        {
+            await ChatService.AddMessageAsync(
+                conversationId, MessageRole.Assistant,
+                "Need help? Ask me about billing, plans, device support or outages — or type \"agent\" to reach a human specialist.",
+                _lifetime.Token);
+        }, "Help could not be displayed. Please try again.");
     }
 
-    private async Task ScrollChatToBottom()
+    private async Task RunConversationOperation(Func<Task> operation, string errorMessage, string? pendingMessage = null)
     {
-        if (_chatWindow is not null)
+        if (_isBusy || _disposed)
         {
-            await _chatWindow.ScrollToBottomAsync();
+            return;
         }
+
+        _isBusy = true;
+        _isWaitingForReply = pendingMessage is not null;
+        _pendingMessage = pendingMessage;
+        _errorMessage = null;
+        StateHasChanged();
+
+        try
+        {
+            await operation();
+        }
+        catch (OperationCanceledException) when (_lifetime.IsCancellationRequested)
+        {
+            // The page was closed while an operation was running.
+        }
+        catch (Exception exception)
+        {
+            Logger.LogWarning(exception, "Chat operation failed");
+            _errorMessage = exception is ChatAgentException ? exception.Message : errorMessage;
+        }
+        finally
+        {
+            if (!_disposed)
+            {
+                try
+                {
+                    if (_conversation is not null)
+                    {
+                        // Refresh after failures too: the service retains a customer
+                        // message when the agent fails. A snapshot avoids showing it
+                        // twice alongside the temporary pending bubble.
+                        _conversation = await ChatService.GetConversationAsync(_conversation.Id.ToString(), _lifetime.Token);
+                        _messages = _conversation.Messages.ToArray();
+                    }
+                }
+                catch (OperationCanceledException) when (_lifetime.IsCancellationRequested)
+                {
+                }
+                catch (Exception exception)
+                {
+                    Logger.LogWarning(exception, "Could not refresh the conversation");
+                    _errorMessage ??= "The conversation could not be refreshed. Please try again.";
+                }
+
+                _pendingMessage = null;
+                _isBusy = false;
+                _isWaitingForReply = false;
+            }
+        }
+    }
+
+    public void Dispose()
+    {
+        _disposed = true;
+        _lifetime.Cancel();
+        _lifetime.Dispose();
     }
 }

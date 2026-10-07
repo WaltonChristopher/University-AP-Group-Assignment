@@ -11,6 +11,7 @@
 
 .yp-input-bar__field {
     flex: 1 1 auto;
+    min-width: 0;
     resize: none;
     border: none;
     background: transparent;
@@ -35,4 +36,16 @@
     flex: 0 0 auto;
     min-width: 88px;
     height: 42px;
+}
+
+@media (max-width: 720px) {
+    .yp-input-bar {
+        gap: 0.4rem;
+        padding: 0.5rem;
+    }
+
+    .yp-input-bar__send {
+        min-width: 64px;
+        padding: 0.55rem 0.65rem;
+    }
 }
