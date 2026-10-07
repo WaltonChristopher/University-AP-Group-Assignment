@@ -21,6 +21,23 @@ public class ApplicationDbContext : DbContext
     {
         base.OnModelCreating(modelBuilder);
 
+        modelBuilder.Entity<User>()
+            .HasKey(user => user.UserId);
+
+        modelBuilder.Entity<Conversation>()
+            .HasKey(conversation => conversation.ConversationId);
+
+        modelBuilder.Entity<Message>()
+            .HasKey(message => message.MessageId);
+
+        modelBuilder.Entity<Conversation>()
+            .HasIndex(c => c.Id)
+            .IsUnique();
+
+        modelBuilder.Entity<Message>()
+            .HasIndex(m => m.Id)
+            .IsUnique();
+
         modelBuilder.Entity<Conversation>()
             .HasOne(c => c.User)
             .WithMany(u => u.Conversations)

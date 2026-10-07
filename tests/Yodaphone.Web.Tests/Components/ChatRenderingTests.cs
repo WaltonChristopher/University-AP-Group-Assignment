@@ -73,6 +73,8 @@ public sealed class ChatRenderingTests
         services.AddLogging();
         services.AddSingleton<IJSRuntime, NoOpJsRuntime>();
         services.AddScoped<IChatAgent, OfflineChatAgent>();
+        services.AddScoped<IConversationRepository, TestConversationRepository>();
+        services.AddSingleton<ICurrentUser>(new TestCurrentUser());
         services.AddScoped<IChatService, ChatService>();
         await using var provider = services.BuildServiceProvider();
         await using var scope = provider.CreateAsyncScope();
@@ -93,5 +95,33 @@ public sealed class ChatRenderingTests
 
         public ValueTask<TValue> InvokeAsync<TValue>(string identifier, CancellationToken cancellationToken, object?[]? args) =>
             ValueTask.FromResult(default(TValue)!);
+    }
+
+    private sealed class TestCurrentUser : ICurrentUser
+    {
+        public int UserId => 1;
+    }
+
+    private sealed class TestConversationRepository : IConversationRepository
+    {
+        private readonly Dictionary<Guid, Conversation> conversations = [];
+
+        public Task AddAsync(Conversation conversation, int userId, CancellationToken cancellationToken = default)
+        {
+            conversations.Add(conversation.Id, conversation);
+            return Task.CompletedTask;
+        }
+
+        public Task<Conversation?> GetAsync(Guid conversationId, int userId, CancellationToken cancellationToken = default) =>
+            Task.FromResult(conversations.GetValueOrDefault(conversationId));
+
+        public Task<Conversation?> GetLatestActiveAsync(int userId, CancellationToken cancellationToken = default) =>
+            Task.FromResult(conversations.Values.LastOrDefault(conversation => conversation.Status == ConversationStatus.Active));
+
+        public Task SaveAsync(Conversation conversation, int userId, CancellationToken cancellationToken = default)
+        {
+            conversations[conversation.Id] = conversation;
+            return Task.CompletedTask;
+        }
     }
 }

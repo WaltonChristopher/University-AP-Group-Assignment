@@ -60,7 +60,29 @@
     private bool _isWaitingForReply;
     private bool _disposed;
 
-    protected override Task OnInitializedAsync() => StartNewChat();
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            _conversation = await ChatService.GetActiveConversationAsync(_lifetime.Token);
+            if (_conversation is not null)
+            {
+                _messages = _conversation.Messages.ToArray();
+                return;
+            }
+        }
+        catch (OperationCanceledException) when (_lifetime.IsCancellationRequested)
+        {
+            return;
+        }
+        catch (Exception exception)
+        {
+            Logger.LogWarning(exception, "Could not restore the active conversation");
+            _errorMessage = "Your previous conversation could not be restored.";
+        }
+
+        await StartNewChat();
+    }
 
     private Task HandleUserMessageSent(string text)
     {

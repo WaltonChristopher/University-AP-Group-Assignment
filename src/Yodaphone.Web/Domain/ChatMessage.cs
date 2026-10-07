@@ -8,7 +8,7 @@ public sealed class ChatMessage
     public string Content { get; private set; }
     public DateTimeOffset SentAt { get; private set; }
 
-    // Parameterless constructor kept for EF Core (issue #8) — not for app code to use.
+    // Used by Restore to recreate a saved message with its original ID and timestamp.
     private ChatMessage()
     {
         Content = string.Empty;
@@ -26,6 +26,31 @@ public sealed class ChatMessage
         Role = role;
         Content = content;
         SentAt = DateTimeOffset.UtcNow;
+    }
+
+    /// <summary>
+    /// Recreates a message previously stored by a repository.
+    /// </summary>
+    public static ChatMessage Restore(
+        Guid id,
+        Guid conversationId,
+        MessageRole role,
+        string content,
+        DateTimeOffset sentAt)
+    {
+        if (string.IsNullOrWhiteSpace(content))
+        {
+            throw new ArgumentException("Message content cannot be empty.", nameof(content));
+        }
+
+        return new ChatMessage
+        {
+            Id = id,
+            ConversationId = conversationId,
+            Role = role,
+            Content = content,
+            SentAt = sentAt
+        };
     }
 
     public bool IsFromAgent => Role == MessageRole.Assistant;

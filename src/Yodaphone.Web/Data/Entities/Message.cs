@@ -4,6 +4,9 @@ public class Message
 {
     public int MessageId { get; set; }
 
+    // Stable public/domain identifier. MessageId remains the SQLite key.
+    public Guid Id { get; set; }
+
     public string MessageContent { get; set; } = string.Empty;
 
     public DateTime DateTime { get; set; }
