@@ -25,43 +25,109 @@ solution/project files and should be restored with `dotnet restore Yodaphone.sln
 
 The Copilot SDK version as specified in `Yodaphone.Web.csproj` is `1.0.13-preview.2`. This is required as it contains a workaround for a known dotnet issue on MacOS (https://github.com/dotnet/sdk/issues/54309). As this is a preview version, any upgrades will need to be checked for compatibility before implementation.
 
-## Developer Setup
+**## Building and running the app**
 
-For ease of setup and consistency we are using a Docker development container. 
+First you will need to download and resolve NuGet packages:
 
-New to C#, .NET, or Blazor? Use the [Yodaphone developer cheatsheet](DEVELOPER-CHEATSHEET.md) for the daily workflow, code examples, debugging, testing, and common fixes.
+```bash
+dotnet restore Yodaphone.sln
+```
 
-### Required Software
+Then build the solution:
 
-- Git
-- VS Code
-  - VS Code `Dev Containers` extension
+```bash
+dotnet build Yodaphone.sln
+```
 
-#### On Windows
+### Database setup
 
-- Windows Subsystem for Linux 2
-  - Open powershell and run `wsl --install` then restart your computer
-- Docker Desktop [Windows](https://www.docker.com/products/docker-desktop/)
-  - Choose the WSL 2 instalation
+The application uses **Entity Framework Core with SQLite**. The database is stored locally at:
 
-#### On MacOS
-- Docker Desktop for Mac
+```text
+src/Yodaphone.Web/Data/Yodaphone.db
+```
 
-### Setting up the dev container
+The database schema is managed using Entity Framework Core migrations.
 
-After installing the required software, make sure Docker is running, then reopen VS Code. You will be notified that you can open the project in a container; accept and the VS Code window will reload, download the container, and run it.
-Alternatively, you can manually reopen in container by pressing `Ctrl+Shift+P` and selecting `Dev Containers: Reopen in Container`.
+#### First-time setup
 
-You will then need to set your Git global config variables by running:
-`git config --global user.name ["Your name"]` and `git config --global user.email [Your email address]`
+Install the Entity Framework Core command-line tools:
 
-### Building and running the app
+```bash
+dotnet tool install --global dotnet-ef
+```
 
-First you will need to download and resolve NuGet packages: `dotnet restore Yodaphone.sln`.
+Verify the installation:
 
-Then you can build the solution: `dotnet build Yodaphone.sln`.
+```bash
+dotnet ef --version
+```
 
-Finally you can run the solution: `dotnet watch --project src/Yodaphone.Web --no-launch-profile`. This will update live as you make changes.
+Create the initial database migration:
+
+```bash
+dotnet ef migrations add InitialCreate --project src/Yodaphone.Web/Yodaphone.Web.csproj
+```
+
+Apply the migration and create the local SQLite database:
+
+```bash
+dotnet ef database update --project src/Yodaphone.Web/Yodaphone.Web.csproj
+```
+
+This creates the `Yodaphone.db` SQLite database containing the `Users`, `Conversations`, and `Messages` tables.
+
+#### Starting the application
+
+Once the initial database has been created, the application can be started normally:
+
+```bash
+dotnet watch --project src/Yodaphone.Web --no-launch-profile
+```
+
+The application automatically checks for pending Entity Framework Core migrations during startup. Therefore, developers do not normally need to run `dotnet ef database update` each time the application is started.
+
+#### Making database changes
+
+When changes are made to the database entity classes, create a new migration:
+
+```bash
+dotnet ef migrations add <MigrationName> --project src/Yodaphone.Web/Yodaphone.Web.csproj
+```
+
+For example:
+
+```bash
+dotnet ef migrations add AddCustomerDetails --project src/Yodaphone.Web/Yodaphone.Web.csproj
+```
+
+The pending migration will be applied automatically when the application next starts.
+
+### Database structure
+
+The current database contains three main tables:
+
+* **Users** — stores users and identifies whether they are support staff.
+* **Conversations** — stores conversations belonging to users.
+* **Messages** — stores messages belonging to conversations and identifies their sender.
+
+The relationships are:
+
+```text
+User
+ ├── Conversations
+ └── Messages
+
+Conversation
+ ├── User
+ └── Messages
+
+Message
+ ├── Sender → User
+ └── Conversation → Conversation
+```
+
+Each message therefore has both a `SenderId` and a `ConversationId`, allowing messages to be associated with both the user who sent them and the conversation they belong to.
 
 ## The Assignment Task
 
