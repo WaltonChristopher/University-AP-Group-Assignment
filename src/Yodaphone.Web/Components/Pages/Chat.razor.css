@@ -1,7 +1,7 @@
 .yp-shell {
     display: flex;
     flex-direction: column;
-    height: calc(100dvh - 7.5rem);
+    height: calc(100dvh - 2rem);
     min-height: 420px;
     min-width: 0;
     overflow: hidden;
@@ -68,11 +68,6 @@
     white-space: nowrap;
 }
 
-.yp-header__new-chat:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-}
-
 .yp-body {
     display: flex;
     flex: 1;
@@ -97,6 +92,12 @@
     border-left: 4px solid var(--yp-danger);
 }
 
+.yp-chat-status {
+    flex: 0 0 auto;
+    margin: 0;
+    font-size: 0.85rem;
+}
+
 @media (max-width: 1000px) {
     .yp-header__user-label {
         display: none;
@@ -105,7 +106,7 @@
 
 @media (max-width: 720px) {
     .yp-shell {
-        height: calc(100dvh - 9rem);
+        height: calc(100dvh - 1rem);
         min-height: 320px;
     }
 
@@ -133,5 +134,9 @@
     .yp-main {
         gap: 0.65rem;
         padding: 0.65rem;
+    }
+
+    .yp-body {
+        flex-direction: column;
     }
 }

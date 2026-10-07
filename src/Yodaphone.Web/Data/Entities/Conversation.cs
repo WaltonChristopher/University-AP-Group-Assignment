@@ -4,6 +4,9 @@ public class Conversation
 {
     public int ConversationId { get; set; }
 
+    // Stable public/domain identifier. ConversationId remains the SQLite key.
+    public Guid Id { get; set; }
+
     public int UserId { get; set; }
 
     public DateTime Start { get; set; }

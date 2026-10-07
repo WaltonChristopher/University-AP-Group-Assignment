@@ -47,11 +47,10 @@ src/Yodaphone.Web/
     _Imports.razor                     Shared Razor namespaces and directives
     Layout/
       MainLayout.razor                 Page shell
-      NavMenu.razor                    Navigation links
     Pages/
-      Home.razor                       Home page
-      Counter.razor                    Simple interactive example
-      Weather.razor                    Data-loading example
+      Chat.razor                       Chat page, available at / and /chat
+      Error.razor                      Application error handler
+      NotFound.razor                   Unknown-route handler
   wwwroot/
     app.css                            Application-wide styles
 ```
@@ -343,17 +342,18 @@ protected override async Task OnInitializedAsync()
 
 Avoid doing network or database work in a component constructor.
 
-## Adding a new page
+## Page routes
 
-1. Create `Components/Pages/Chat.razor`.
-2. Give it a route with `@page "/chat"`.
-3. Add a link in `Components/Layout/NavMenu.razor`.
-4. Save while `dotnet watch` is running.
-5. Visit <http://localhost:5000/chat>.
+The application's only user-facing page is `Components/Pages/Chat.razor`.
+It has both `@page "/"` and `@page "/chat"`, so the root URL opens Chat and
+existing `/chat` links still work. Error and unknown-route handlers remain
+available for failures. Save changes while `dotnet watch` is running, then
+visit <http://localhost:5000>.
 
-Starter page:
+Example of a routed chat component:
 
 ```razor
+@page "/"
 @page "/chat"
 
 <PageTitle>Customer service chat</PageTitle>
@@ -604,8 +604,8 @@ Run **Dev Containers: Rebuild and Reopen in Container**. Reloading the VS Code w
 
 ## Suggested learning order
 
-1. Run the existing application and edit `Home.razor`.
-2. Understand the interactive `Counter.razor` example.
+1. Run the existing application and edit `Chat.razor`.
+2. Understand the interactive `ChatInput.razor` component.
 3. Create a small routed Razor page.
 4. Practise C# classes, records, collections, and nullable values.
 5. Move logic from a component into an injected service.

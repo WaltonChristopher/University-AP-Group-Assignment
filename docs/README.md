@@ -27,6 +27,23 @@ The Copilot SDK version as specified in `Yodaphone.Web.csproj` is `1.0.13-previe
 
 **## Building and running the app**
 
+### Setting appsettings.json
+
+`appsettings.json` contains the following configurable values:
+
+```json
+{
+  "Chat": {
+    "Agent": "offline",
+    "DevelopmentUserId": 42
+  }
+}
+```
+
+`Agent` represents which AI agent to use for chat replies. It may be `"offline"` or `"copilot"`. For the copilot agent, refer to the [Copilot setup](#github-copilot-authentication) below.
+
+`DevelopmentUserId` is a placeholder value for the user's ID and should be replaced once we have user authentication working. It can be set to any positive integer.
+
 First you will need to download and resolve NuGet packages:
 
 ```bash
@@ -51,13 +68,15 @@ The database schema is managed using Entity Framework Core migrations.
 
 #### First-time setup
 
-Install the Entity Framework Core command-line tools:
+The Dev Container automatically restores the Entity Framework Core command-line tools during creation. For an existing container, select **Dev Containers: Rebuild Container** in VS Code, or run the following from the repository root. Developers working outside the container should also run this command:
 
 ```bash
-dotnet tool install --global dotnet-ef
+dotnet tool restore
 ```
 
-Verify the installation:
+The tool version is pinned in `.config/dotnet-tools.json` to match the project's Entity Framework Core packages. Update both together when upgrading Entity Framework Core.
+
+Verify the installation from the repository root:
 
 ```bash
 dotnet ef --version
@@ -127,14 +146,25 @@ Message
  └── Conversation → Conversation
 ```
 
-Each message therefore has both a `SenderId` and a `ConversationId`, allowing messages to be associated with both the user who sent them and the conversation they belong to.
+Each message has both a `SenderId` and a `ConversationId`, associating it with a user record and the conversation it belongs to. The chatbot's current mapping of sender and role is described below.
+
+#### Conversation persistence
+
+`ChatService` stores conversations through `IConversationRepository`. The SQLite implementation maps domain GUIDs to the separate `Id` columns; the integer `ConversationId` and `MessageId` columns are database keys. 
+
+Timestamps are stored in UTC, and the conversation's closed status and message order are restored on load.
+
+Each call to `IChatService.StartConversationAsync()` creates a fresh conversation GUID owned by the same current user, retaining previous chats. `GetConversationsAsync()` returns that user's active and closed conversations with their messages, ordered by most recent activity first; it returns an empty list for a user with no chats. `GetConversationAsync(conversationId)` loads an individual chat owned by that user. Starting another conversation does not close the previous one; closing remains a separate operation.
+
+The owner ID comes from `ICurrentUser`. Development currently uses `Chat:DevelopmentUserId` (default `1`); authentication can replace that identity source later. These backend methods are ready for a future chat history UI.
+
+`Message.Status` stores the message role (`Customer`, `Assistant`, or `System`), while `SenderId` references the conversation owner for all three roles.
+
+The conversation repository uses `IDbContextFactory<ApplicationDbContext>` to create and dispose a database context for each operation. This prevents a context and its tracked entities from living for the whole Blazor circuit. Customer messages are committed before requesting an AI reply, and assistant replies are saved afterward, so an AI failure or cancellation retains the customer message without holding a database context open during the network call.
 
 ### GitHub Copilot authentication
 
-The browser does not authenticate directly with Copilot. The Blazor server starts the
-Copilot runtime, so configure a GitHub token for a Copilot-entitled service/developer
-account on the server. Do not place it in `appsettings.json`, JavaScript, or a browser
-cookie.
+The browser does not authenticate directly with Copilot. The Blazor server starts the Copilot runtime, so configure a GitHub token for a Copilot-entitled service/developer account on the server. Do not place it in `appsettings.json`, JavaScript, or a browser cookie.
 
 For local development, store it in user secrets:
 
@@ -142,11 +172,7 @@ For local development, store it in user secrets:
 dotnet user-secrets set "Chat:Copilot:GitHubToken" "YOUR_GITHUB_TOKEN" --project src/Yodaphone.Web
 ```
 
-For a deployed app, set the equivalent environment variable in the server's secret
-store: `Chat__Copilot__GitHubToken`. The SDK gives this explicit token precedence over
-any local GitHub CLI/Copilot login. If no token is configured, local development can
-fall back to an existing logged-in GitHub CLI/Copilot runtime identity; that fallback is
-not appropriate for a shared or production server.
+For a deployed app, set the equivalent environment variable in the server's secret store: `Chat__Copilot__GitHubToken`. The SDK gives this explicit token precedence over any local GitHub CLI/Copilot login. If no token is configured, local development can fall back to an existing logged-in GitHub CLI/Copilot runtime identity. *This fallback is not appropriate for a shared or production server.*
 
 ## The Assignment Task
 
