@@ -53,11 +53,14 @@ public interface IConversationRepository
     /// <remarks>
     /// Messages are immutable: existing message rows are neither edited nor deleted.
     /// Saving the same message GUID again must not create a duplicate row.
+    /// Persisted closure is final: stale snapshots cannot reopen a conversation or
+    /// append new messages after it closes. State checks and writes must be atomic.
     /// </remarks>
     /// <param name="conversation">The existing conversation containing the changes to save.</param>
     /// <param name="userId">The positive, server-trusted ID of the conversation owner.</param>
     /// <param name="cancellationToken">Cancels the database operation.</param>
     /// <returns>A task that completes after the changes have been saved.</returns>
     /// <exception cref="KeyNotFoundException">No conversation with this GUID belongs to the specified owner.</exception>
+    /// <exception cref="InvalidOperationException">New messages were supplied for a conversation that is already closed.</exception>
     Task SaveAsync(Conversation conversation, int userId, CancellationToken cancellationToken = default);
 }

@@ -1,4 +1,6 @@
+using System.Data.Common;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 using Xunit;
 using Yodaphone.Web.Domain;
 using Yodaphone.Web.Services;
@@ -7,6 +9,87 @@ namespace Yodaphone.Web.Tests.Services;
 
 public sealed class SqliteConversationRepositoryTests
 {
+    [Fact]
+    public async Task AddAsync_creates_one_user_and_both_chats_when_first_sessions_overlap()
+    {
+        await using var database = await SqliteTestDatabase.CreateAsync(interceptors: [new FirstUserLookupBarrier()]);
+        var first = new Conversation(Guid.NewGuid(), DateTimeOffset.UtcNow);
+        var second = new Conversation(Guid.NewGuid(), DateTimeOffset.UtcNow);
+
+        // Separate worker threads are necessary because SQLite's async API can execute synchronously.
+        await Task.WhenAll(
+            Task.Run(() => new SqliteConversationRepository(database).AddAsync(first, 42)),
+            Task.Run(() => new SqliteConversationRepository(database).AddAsync(second, 42)));
+
+        await using (var context = database.CreateDbContext())
+        {
+            Assert.Equal(42, (await context.Users.SingleAsync()).UserId);
+            Assert.Equal(2, await context.Conversations.CountAsync());
+        }
+        var chats = await new SqliteConversationRepository(database).GetAllAsync(42);
+        Assert.Contains(chats, chat => chat.Id == first.Id);
+        Assert.Contains(chats, chat => chat.Id == second.Id);
+        database.AssertAllContextsDisposed();
+    }
+
+    [Fact]
+    public async Task AddAsync_preserves_existing_user_and_rolls_back_new_user_when_chat_save_fails()
+    {
+        await using var database = await SqliteTestDatabase.CreateAsync();
+        await using (var context = database.CreateDbContext())
+        {
+            context.Users.Add(new() { UserId = 42, Support = true });
+            await context.SaveChangesAsync();
+        }
+        var repository = new SqliteConversationRepository(database);
+        var conversation = new Conversation(Guid.NewGuid(), DateTimeOffset.UtcNow);
+        await repository.AddAsync(conversation, 42);
+
+        // A duplicate conversation fails after the second owner's user insert.
+        await Assert.ThrowsAsync<DbUpdateException>(() => repository.AddAsync(conversation, 43));
+
+        await using (var context = database.CreateDbContext())
+        {
+            Assert.True((await context.Users.SingleAsync()).Support);
+            Assert.Equal(42, (await context.Conversations.SingleAsync()).UserId);
+        }
+        database.AssertAllContextsDisposed();
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task SaveAsync_preserves_a_completed_close_when_saving_a_stale_active_snapshot(bool appendMessage)
+    {
+        await using var database = await SqliteTestDatabase.CreateAsync();
+        var repository = new SqliteConversationRepository(database);
+        var conversation = new Conversation(Guid.NewGuid(), DateTimeOffset.UtcNow.AddMinutes(-5));
+        await repository.AddAsync(conversation, 42);
+        var stale = await repository.GetAsync(conversation.Id, 42);
+        Assert.NotNull(stale);
+        conversation.AddMessage(MessageRole.Customer, "Committed before close");
+        conversation.Close();
+        await repository.SaveAsync(conversation, 42);
+
+        if (appendMessage)
+        {
+            stale.AddMessage(MessageRole.Assistant, "Late reply");
+            await Assert.ThrowsAsync<InvalidOperationException>(() => repository.SaveAsync(stale, 42));
+        }
+        else
+        {
+            // Re-saving an unchanged old snapshot is harmless and must remain idempotent.
+            await repository.SaveAsync(stale, 42);
+        }
+
+        var restored = await repository.GetAsync(conversation.Id, 42);
+        Assert.NotNull(restored);
+        Assert.Equal(ConversationStatus.Closed, restored.Status);
+        Assert.Equal(conversation.LastActivityAt, restored.LastActivityAt);
+        Assert.Equal("Committed before close", Assert.Single(restored.Messages).Content);
+        database.AssertAllContextsDisposed();
+    }
+
     [Fact]
     public async Task GetAllAsync_returns_owned_chats_with_messages_in_activity_order_including_closed_chats()
     {
@@ -176,5 +259,31 @@ public sealed class SqliteConversationRepositoryTests
 
         await Assert.ThrowsAsync<InvalidOperationException>(() => repository.GetAsync(conversation.Id, userId: 7));
         database.AssertAllContextsDisposed();
+    }
+
+    /// <summary>
+    /// Makes the old check-then-insert race deterministic by letting both existence
+    /// checks complete before either caller can insert. An idempotent insert has no such check.
+    /// </summary>
+    private sealed class FirstUserLookupBarrier : DbCommandInterceptor
+    {
+        private int lookupCount;
+        private readonly TaskCompletionSource bothLookups = new(TaskCreationOptions.RunContinuationsAsynchronously);
+
+        public override async ValueTask<DbDataReader> ReaderExecutedAsync(
+            DbCommand command, CommandExecutedEventData eventData, DbDataReader result,
+            CancellationToken cancellationToken = default)
+        {
+            if (command.CommandText.Contains("SELECT EXISTS", StringComparison.Ordinal)
+                && command.CommandText.Contains("FROM \"Users\"", StringComparison.Ordinal))
+            {
+                if (Interlocked.Increment(ref lookupCount) == 2)
+                {
+                    bothLookups.TrySetResult();
+                }
+                await bothLookups.Task.WaitAsync(TimeSpan.FromSeconds(10), cancellationToken);
+            }
+            return result;
+        }
     }
 }

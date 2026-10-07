@@ -180,6 +180,43 @@ public sealed class ChatServicePersistenceTests
         database.AssertAllContextsDisposed();
     }
 
+    [Fact]
+    public async Task SendMessageAsync_rejects_reply_when_another_service_closes_the_chat_during_the_agent_call()
+    {
+        await using var database = await SqliteTestDatabase.CreateAsync();
+        var agentStarted = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        var releaseReply = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        var agent = new CallbackAgent(async (_, cancellationToken) =>
+        {
+            database.AssertAllContextsDisposed();
+            agentStarted.SetResult();
+            await releaseReply.Task.WaitAsync(cancellationToken);
+            return new AgentChatResponse { Content = "Late reply" };
+        });
+        var sendingService = new ChatService(agent, new SqliteConversationRepository(database), new TestCurrentUser());
+        var closingService = new ChatService(new OfflineChatAgent(), new SqliteConversationRepository(database), new TestCurrentUser());
+        var conversation = await sendingService.StartConversationAsync();
+        var sending = sendingService.SendMessageAsync(conversation.Id.ToString(), "Hello");
+
+        try
+        {
+            await agentStarted.Task.WaitAsync(TimeSpan.FromSeconds(10));
+            await closingService.CloseConversationAsync(conversation.Id.ToString());
+        }
+        finally
+        {
+            releaseReply.TrySetResult();
+        }
+
+        await Assert.ThrowsAsync<InvalidOperationException>(() => sending);
+        var restored = await closingService.GetConversationAsync(conversation.Id.ToString());
+        Assert.Equal(ConversationStatus.Closed, restored.Status);
+        Assert.Equal("Hello", Assert.Single(restored.Messages).Content);
+        await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            sendingService.SendMessageAsync(conversation.Id.ToString(), "Another message"));
+        database.AssertAllContextsDisposed();
+    }
+
     private sealed class CallbackAgent(
         Func<IReadOnlyList<ChatMessage>, CancellationToken, Task<AgentChatResponse>> callback) : IChatAgent
     {

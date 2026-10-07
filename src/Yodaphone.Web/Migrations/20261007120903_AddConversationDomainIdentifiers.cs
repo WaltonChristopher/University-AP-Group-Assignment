@@ -27,10 +27,11 @@ namespace Yodaphone.Web.Migrations
 
             // Existing installations can contain multiple rows. Give every legacy
             // row a distinct public GUID before the unique indexes are added.
+            // Microsoft.Data.Sqlite binds GUID parameters as uppercase TEXT.
             migrationBuilder.Sql(
-                "UPDATE \"Messages\" SET \"Id\" = lower(hex(randomblob(4)) || '-' || hex(randomblob(2)) || '-' || hex(randomblob(2)) || '-' || hex(randomblob(2)) || '-' || hex(randomblob(6)));" );
+                "UPDATE \"Messages\" SET \"Id\" = upper(hex(randomblob(4)) || '-' || hex(randomblob(2)) || '-' || hex(randomblob(2)) || '-' || hex(randomblob(2)) || '-' || hex(randomblob(6)));");
             migrationBuilder.Sql(
-                "UPDATE \"Conversations\" SET \"Id\" = lower(hex(randomblob(4)) || '-' || hex(randomblob(2)) || '-' || hex(randomblob(2)) || '-' || hex(randomblob(2)) || '-' || hex(randomblob(6)));" );
+                "UPDATE \"Conversations\" SET \"Id\" = upper(hex(randomblob(4)) || '-' || hex(randomblob(2)) || '-' || hex(randomblob(2)) || '-' || hex(randomblob(2)) || '-' || hex(randomblob(6)));");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Messages_Id",

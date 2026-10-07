@@ -1,5 +1,9 @@
+using System.Collections.Concurrent;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
+using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Xunit;
 using Yodaphone.Web.Data;
 
@@ -16,26 +20,27 @@ internal sealed class SqliteTestDatabase : IDbContextFactory<ApplicationDbContex
 {
     private readonly string path = Path.Combine(Path.GetTempPath(), $"yodaphone-tests-{Guid.NewGuid():N}.db");
     private readonly DbContextOptions<ApplicationDbContext> options;
-    private readonly List<ApplicationDbContext> contexts = [];
+    private readonly ConcurrentBag<ApplicationDbContext> contexts = [];
 
-    private SqliteTestDatabase()
+    private SqliteTestDatabase(IInterceptor[] interceptors)
     {
         options = new DbContextOptionsBuilder<ApplicationDbContext>()
             // Avoid pooled connections retaining a Windows file handle during cleanup.
             .UseSqlite(new SqliteConnectionStringBuilder { DataSource = path, Pooling = false }.ToString())
+            .AddInterceptors(interceptors)
             .Options;
     }
 
     /// <summary>
     /// Creates a temporary database using the application's real schema migrations.
     /// </summary>
-    public static async Task<SqliteTestDatabase> CreateAsync()
+    public static async Task<SqliteTestDatabase> CreateAsync(string? targetMigration = null, params IInterceptor[] interceptors)
     {
-        var database = new SqliteTestDatabase();
+        var database = new SqliteTestDatabase(interceptors);
         try
         {
             await using var context = database.CreateDbContext();
-            await context.Database.MigrateAsync();
+            await context.GetService<IMigrator>().MigrateAsync(targetMigration);
             return database;
         }
         catch

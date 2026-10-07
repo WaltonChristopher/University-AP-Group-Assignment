@@ -2,7 +2,6 @@ using Microsoft.EntityFrameworkCore;
 using Yodaphone.Web.Data;
 using DataConversation = Yodaphone.Web.Data.Entities.Conversation;
 using DataMessage = Yodaphone.Web.Data.Entities.Message;
-using DataUser = Yodaphone.Web.Data.Entities.User;
 using DomainConversation = Yodaphone.Web.Domain.Conversation;
 using DomainMessage = Yodaphone.Web.Domain.ChatMessage;
 using Yodaphone.Web.Domain;
@@ -40,6 +39,7 @@ public sealed class SqliteConversationRepository : IConversationRepository
         // A Blazor circuit can outlive many operations. Keep tracking and the
         // context lifetime inside this database operation, including on failure.
         await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
+        await using var transaction = await dbContext.Database.BeginTransactionAsync(cancellationToken);
         await EnsureUserExistsAsync(dbContext, userId, cancellationToken);
 
         var entity = new DataConversation
@@ -57,6 +57,7 @@ public sealed class SqliteConversationRepository : IConversationRepository
 
         dbContext.Conversations.Add(entity);
         await dbContext.SaveChangesAsync(cancellationToken);
+        await transaction.CommitAsync(cancellationToken);
     }
 
     /// <inheritdoc />
@@ -118,6 +119,11 @@ public sealed class SqliteConversationRepository : IConversationRepository
         ValidateUserId(userId);
         await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
 
+        // SQLite starts an immediate write transaction. Other contexts/processes
+        // cannot close or change this row between our state check and commit.
+        // The service's AI call takes place outside this short transaction.
+        await using var transaction = await dbContext.Database.BeginTransactionAsync(cancellationToken);
+
         var entity = await dbContext.Conversations
             .Include(storedConversation => storedConversation.Messages)
             .SingleOrDefaultAsync(
@@ -125,31 +131,42 @@ public sealed class SqliteConversationRepository : IConversationRepository
                 cancellationToken)
             ?? throw new KeyNotFoundException($"Conversation '{conversation.Id}' was not found.");
 
-        CopyConversation(conversation, entity);
-
         // Each save uses a fresh context, so compare persisted GUIDs rather than
         // object references to avoid inserting earlier messages a second time.
         var storedMessageIds = entity.Messages.Select(message => message.Id).ToHashSet();
-        foreach (var message in conversation.Messages.Where(message => !storedMessageIds.Contains(message.Id)))
+        var newMessages = conversation.Messages.Where(message => !storedMessageIds.Contains(message.Id)).ToArray();
+        if (entity.Closed && newMessages.Length > 0)
+        {
+            throw new InvalidOperationException("Cannot add a message to a closed conversation.");
+        }
+
+        // A domain snapshot may predate another session's save. Closure is final
+        // and activity must never move backwards when that snapshot is saved.
+        entity.Closed |= conversation.Status == ConversationStatus.Closed;
+        if (conversation.LastActivityAt.UtcDateTime > entity.LastUpdated)
+        {
+            entity.LastUpdated = conversation.LastActivityAt.UtcDateTime;
+        }
+        foreach (var message in newMessages)
         {
             entity.Messages.Add(ToEntity(message, userId));
         }
 
         await dbContext.SaveChangesAsync(cancellationToken);
+        await transaction.CommitAsync(cancellationToken);
     }
 
     /// <summary>
-    /// Adds the configured development user if needed. The caller saves that user
-    /// together with the new conversation in the same database operation.
+    /// Adds the configured development user if needed, in the caller's conversation transaction.
     /// </summary>
     private static async Task EnsureUserExistsAsync(ApplicationDbContext dbContext, int userId, CancellationToken cancellationToken)
     {
-        if (await dbContext.Users.AnyAsync(user => user.UserId == userId, cancellationToken))
-        {
-            return;
-        }
-
-        dbContext.Users.Add(new DataUser { UserId = userId, Support = false });
+        // The insert is idempotent across sessions and leaves an existing user's
+        // fields untouched. Interpolation binds the owner ID as a SQL parameter.
+        await dbContext.Database.ExecuteSqlInterpolatedAsync($"""
+            INSERT INTO "Users" ("UserId", "Support") VALUES ({userId}, 0)
+            ON CONFLICT ("UserId") DO NOTHING;
+            """, cancellationToken);
     }
 
     /// <summary>
