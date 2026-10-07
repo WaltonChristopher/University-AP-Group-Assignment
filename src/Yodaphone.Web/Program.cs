@@ -1,3 +1,5 @@
+using Microsoft.EntityFrameworkCore;
+using Yodaphone.Web.Data;
 using Yodaphone.Web.Components;
 using Yodaphone.Web.Services;
 using Yodaphone.Web.Chat.Agents;
@@ -31,15 +33,23 @@ public static class Program
                 throw new InvalidOperationException($"Unknown chat agent: {agentName}");
         }
 
-        var app = builder.Build();
+builder.Services.AddDbContext<ApplicationDbContext>(options =>
+   options.UseSqlite(
+        builder.Configuration.GetConnectionString("DefaultConnection")));
 
-        // Configure the HTTP request pipeline.
-        if (!app.Environment.IsDevelopment())
-        {
-            app.UseExceptionHandler("/Error", createScopeForErrors: true);
-        }
-        app.UseStatusCodePagesWithReExecute("/not-found", createScopeForStatusCodePages: true);
-        app.UseAntiforgery();
+var app = builder.Build();
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+    db.Database.Migrate();
+}
+// Configure the HTTP request pipeline.
+if (!app.Environment.IsDevelopment())
+{
+    app.UseExceptionHandler("/Error", createScopeForErrors: true);
+}
+app.UseStatusCodePagesWithReExecute("/not-found", createScopeForStatusCodePages: true);
+app.UseAntiforgery();
 
         app.MapStaticAssets();
         app.MapRazorComponents<App>()
