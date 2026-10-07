@@ -22,5 +22,5 @@
     [Parameter] public DomainMessage? Message { get; set; }
     [Parameter] public string? PendingContent { get; set; }
 
-    private bool IsFromAgent => Message?.Role == MessageRole.Assistant;
+    private bool IsFromAgent => Message?.IsFromAgent ?? false;
 }
