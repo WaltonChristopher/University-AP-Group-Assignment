@@ -2,36 +2,46 @@
 @using Yodaphone.Web.Domain
 @using DomainMessage = Yodaphone.Web.Domain.ChatMessage
 
-<section class="yp-chat-window" id="@_elementId">
-    @if (Messages.Count == 0 && PendingMessage is null)
-    {
-        <p class="yp-chat-window__empty">Send a message to start the conversation.</p>
-    }
+<section class="yp-chat-window" aria-label="Chat">
+    <div class="yp-chat-window__toolbar">
+        <button type="button" class="yp-btn yp-btn--solid" @onclick="OnNewConversation" disabled="@IsBusy">
+            New conversation
+        </button>
+    </div>
 
-    @foreach (var message in Messages.Where(message => message.Role != MessageRole.System))
-    {
-        <ChatMessage @key="message.Id" Message="message" />
-    }
+    <div class="yp-chat-window__messages" id="@_elementId">
+        @if (Messages.Count == 0 && PendingMessage is null)
+        {
+            <p class="yp-chat-window__empty">Send a message to start the conversation.</p>
+        }
 
-    @if (PendingMessage is not null)
-    {
-        <ChatMessage PendingContent="@PendingMessage" />
-    }
+        @foreach (var message in Messages.Where(message => message.Role != MessageRole.System))
+        {
+            <ChatMessage @key="message.Id" Message="message" />
+        }
 
-    @if (IsBotTyping)
-    {
-        <div class="yp-typing" aria-live="polite">
-            <span class="yp-typing__dot"></span>
-            <span class="yp-typing__dot"></span>
-            <span class="yp-typing__dot"></span>
-        </div>
-    }
+        @if (PendingMessage is not null)
+        {
+            <ChatMessage PendingContent="@PendingMessage" />
+        }
+
+        @if (IsBotTyping)
+        {
+            <div class="yp-typing" aria-live="polite">
+                <span class="yp-typing__dot"></span>
+                <span class="yp-typing__dot"></span>
+                <span class="yp-typing__dot"></span>
+            </div>
+        }
+    </div>
 </section>
 
 @code {
     [Parameter] public IReadOnlyCollection<DomainMessage> Messages { get; set; } = Array.Empty<DomainMessage>();
     [Parameter] public string? PendingMessage { get; set; }
     [Parameter] public bool IsBotTyping { get; set; }
+    [Parameter] public bool IsBusy { get; set; }
+    [Parameter] public EventCallback OnNewConversation { get; set; }
 
     private readonly string _elementId = $"yp-chat-window-{Guid.NewGuid():N}";
     private int _lastRenderedCount;

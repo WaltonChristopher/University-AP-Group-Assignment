@@ -18,10 +18,6 @@
             <span class="yp-brand-name">YodaPhone <em>AI</em></span>
         </div>
 
-        <button class="yp-btn yp-btn--ghost yp-header__new-chat" @onclick="StartNewChat" disabled="@_isBusy">
-            New chat
-        </button>
-
         <div class="yp-header__spacer"></div>
 
         <div class="yp-header__user">
@@ -31,17 +27,26 @@
     </header>
 
     <div class="yp-body">
-        <Sidebar DarkMode="_darkMode" OnDarkModeToggled="ToggleDarkMode" OnHelpRequested="ShowHelp" />
+        <Sidebar Conversations="_conversations" SelectedConversationId="_conversation?.Id"
+                 OnConversationSelected="SelectConversation" IsBusy="_isBusy" CanShowHelp="CanSendMessages"
+                 DarkMode="_darkMode" OnDarkModeToggled="ToggleDarkMode" OnHelpRequested="ShowHelp" />
 
         <main class="yp-main">
-            <ChatWindow Messages="_messages" PendingMessage="@_pendingMessage" IsBotTyping="_isWaitingForReply" />
+            <ChatWindow @key="_conversation?.Id" Messages="_messages" PendingMessage="@_pendingMessage"
+                        IsBotTyping="_isWaitingForReply" OnNewConversation="StartNewChat" IsBusy="_isBusy" />
 
             @if (_errorMessage is not null)
             {
                 <div class="yp-chat-error" role="alert">@_errorMessage</div>
             }
 
-            <ChatInput OnMessageSent="HandleUserMessageSent" IsSending="@(_isBusy || _conversation is null)" />
+            @if (_conversation?.Status == ConversationStatus.Closed)
+            {
+                <p class="yp-chat-status">This conversation is closed. Start a new conversation to send a message.</p>
+            }
+
+            <ChatInput @key="(_conversation?.Id, nameof(ChatInput))" OnMessageSent="HandleUserMessageSent"
+                       IsSending="_isBusy" IsDisabled="@(!CanSendMessages)" />
         </main>
     </div>
 </div>
@@ -51,7 +56,9 @@
     private string UserInitial => string.IsNullOrWhiteSpace(UserName) ? "?" : UserName[0].ToString();
 
     private Conversation? _conversation;
+    private IReadOnlyList<Conversation> _conversations = Array.Empty<Conversation>();
     private IReadOnlyCollection<DomainMessage> _messages = Array.Empty<DomainMessage>();
+    private bool CanSendMessages => _conversation?.Status == ConversationStatus.Active;
     private readonly CancellationTokenSource _lifetime = new();
     private string? _pendingMessage;
     private string? _errorMessage;
@@ -64,6 +71,7 @@
     {
         try
         {
+            _conversations = await ChatService.GetConversationsAsync(_lifetime.Token);
             _conversation = await ChatService.GetActiveConversationAsync(_lifetime.Token);
             if (_conversation is not null)
             {
@@ -86,12 +94,12 @@
 
     private Task HandleUserMessageSent(string text)
     {
-        if (string.IsNullOrWhiteSpace(text) || _conversation is null)
+        if (string.IsNullOrWhiteSpace(text) || !CanSendMessages)
         {
             return Task.CompletedTask;
         }
 
-        var conversationId = _conversation.Id.ToString();
+        var conversationId = _conversation!.Id.ToString();
         return RunConversationOperation(
             async () => { await ChatService.SendMessageAsync(conversationId, text.Trim(), _lifetime.Token); },
             "Your message could not be completed. Please try again.",
@@ -100,18 +108,25 @@
 
     private Task StartNewChat() => RunConversationOperation(async () =>
     {
-        if (_conversation is not null)
-        {
-            await ChatService.CloseConversationAsync(_conversation.Id.ToString(), _lifetime.Token);
-            _conversation = null;
-            _messages = Array.Empty<DomainMessage>();
-        }
-
+        // Selecting a new chat leaves earlier conversations available to continue.
         _conversation = await ChatService.StartConversationAsync(_lifetime.Token);
         await ChatService.AddMessageAsync(
             _conversation.Id.ToString(), MessageRole.Assistant,
             "Hello! I'm YodaPhone AI. How can I help with your account today?", _lifetime.Token);
     }, "A new chat could not be started. Please try again.");
+
+    private Task SelectConversation(Guid conversationId)
+    {
+        if (_conversation?.Id == conversationId)
+        {
+            return Task.CompletedTask;
+        }
+
+        return RunConversationOperation(async () =>
+        {
+            _conversation = await ChatService.GetConversationAsync(conversationId.ToString(), _lifetime.Token);
+        }, "The conversation could not be loaded. Please try again.");
+    }
 
     private void ToggleDarkMode()
     {
@@ -120,12 +135,12 @@
 
     private Task ShowHelp()
     {
-        if (_conversation is null)
+        if (!CanSendMessages)
         {
             return Task.CompletedTask;
         }
 
-        var conversationId = _conversation.Id.ToString();
+        var conversationId = _conversation!.Id.ToString();
         return RunConversationOperation(async () =>
         {
             await ChatService.AddMessageAsync(
@@ -183,6 +198,21 @@
                 {
                     Logger.LogWarning(exception, "Could not refresh the conversation");
                     _errorMessage ??= "The conversation could not be refreshed. Please try again.";
+                }
+
+                try
+                {
+                    // Refresh the preview after sends, including saved customer
+                    // messages whose agent reply failed, and after starting a chat.
+                    _conversations = await ChatService.GetConversationsAsync(_lifetime.Token);
+                }
+                catch (OperationCanceledException) when (_lifetime.IsCancellationRequested)
+                {
+                }
+                catch (Exception exception)
+                {
+                    Logger.LogWarning(exception, "Could not refresh the conversation list");
+                    _errorMessage ??= "Your conversations could not be refreshed. Please try again.";
                 }
 
                 _pendingMessage = null;

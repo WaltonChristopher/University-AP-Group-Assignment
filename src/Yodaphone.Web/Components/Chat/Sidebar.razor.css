@@ -2,16 +2,32 @@
     flex: 0 0 var(--yp-sidebar-width);
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
+    min-height: 0;
+    min-width: 0;
     background: var(--yp-surface-chrome);
     border-right: 1px solid rgba(255, 255, 255, 0.08);
     padding: 1rem 0.75rem;
-    overflow-y: auto;
+    overflow: hidden;
+}
+
+.yp-sidebar__heading {
+    display: flex;
+    align-items: center;
+    flex: 0 0 auto;
+    gap: 0.6rem;
+    margin: 0 0 0.5rem;
+    padding: 0.65rem 0.75rem;
+    font-size: 0.9rem;
+    font-weight: 500;
 }
 
 .yp-sidebar__nav {
     display: flex;
     flex-direction: column;
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
     gap: 0.35rem;
 }
 
@@ -34,10 +50,6 @@
     background: var(--yp-surface-chrome-hover);
 }
 
-.yp-sidebar__item--active {
-    background: var(--yp-teal-700);
-}
-
 .yp-sidebar__icon {
     font-size: 0.95rem;
     width: 1.1rem;
@@ -46,6 +58,9 @@
 }
 
 .yp-sidebar__inquiry {
+    flex: 0 0 auto;
+    width: 100%;
+    min-width: 0;
     background: transparent;
     border: none;
     color: var(--yp-text-on-chrome);
@@ -59,6 +74,23 @@
     text-overflow: ellipsis;
 }
 
+.yp-sidebar__inquiry--active {
+    opacity: 1;
+    background: var(--yp-teal-700);
+}
+
+.yp-sidebar__inquiry:disabled,
+.yp-sidebar__item:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.yp-sidebar__empty {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.82rem;
+    opacity: 0.72;
+}
+
 .yp-sidebar__inquiry:hover {
     opacity: 1;
     background: var(--yp-surface-chrome-hover);
@@ -67,28 +99,38 @@
 .yp-sidebar__footer {
     display: flex;
     flex-direction: column;
+    flex: 0 0 auto;
     gap: 0.35rem;
     border-top: 1px solid rgba(255, 255, 255, 0.08);
     padding-top: 0.75rem;
+    margin-top: 0.75rem;
 }
 
 @media (max-width: 720px) {
     .yp-sidebar {
-        flex-basis: 64px;
-        padding: 1rem 0.4rem;
+        flex: 0 0 auto;
+        max-height: 170px;
+        padding: 0.5rem;
+        border-right: none;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .yp-sidebar__heading {
+        margin-bottom: 0.25rem;
+        padding: 0.25rem 0.75rem;
+    }
+
+    .yp-sidebar__nav {
+        max-height: 76px;
+    }
+
+    .yp-sidebar__footer {
+        flex-direction: row;
+        margin-top: 0.25rem;
+        padding-top: 0.25rem;
     }
 
     .yp-sidebar__item {
-        justify-content: center;
-        font-size: 0;
-        padding: 0.65rem;
-    }
-
-    .yp-sidebar__icon {
-        font-size: 1.1rem;
-    }
-
-    .yp-sidebar__inquiry {
-        display: none;
+        padding: 0.35rem 0.75rem;
     }
 }

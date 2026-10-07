@@ -8,6 +8,53 @@ namespace Yodaphone.Web.Tests.Services;
 public sealed class SqliteConversationRepositoryTests
 {
     [Fact]
+    public async Task GetAllAsync_returns_owned_chats_with_messages_in_activity_order_including_closed_chats()
+    {
+        await using var database = await SqliteTestDatabase.CreateAsync();
+        var repository = new SqliteConversationRepository(database);
+        var startedAt = new DateTimeOffset(2026, 10, 7, 10, 0, 0, TimeSpan.Zero);
+        var older = new Conversation(Guid.NewGuid(), startedAt);
+        var closedId = Guid.NewGuid();
+        var savedMessage = ChatMessage.Restore(
+            Guid.NewGuid(), closedId, MessageRole.Customer, "Saved chat", startedAt.AddMinutes(2));
+        var closed = Conversation.Restore(
+            closedId, startedAt.AddMinutes(1), savedMessage.SentAt, ConversationStatus.Closed, [savedMessage]);
+        // Insert an equal-activity chat later to exercise the database-key tie breaker.
+        var tied = new Conversation(Guid.NewGuid(), savedMessage.SentAt);
+        var otherUsersChat = new Conversation(Guid.NewGuid(), startedAt.AddMinutes(3));
+        await repository.AddAsync(older, userId: 42);
+        await repository.AddAsync(closed, userId: 42);
+        await repository.AddAsync(tied, userId: 42);
+        await repository.AddAsync(otherUsersChat, userId: 43);
+
+        var chats = await new SqliteConversationRepository(database).GetAllAsync(userId: 42);
+
+        Assert.Equal(new[] { tied.Id, closed.Id, older.Id }, chats.Select(conversation => conversation.Id));
+        Assert.Equal(ConversationStatus.Closed, chats[1].Status);
+        var restoredMessage = Assert.Single(chats[1].Messages);
+        Assert.Equal(savedMessage.Id, restoredMessage.Id);
+        Assert.Equal(closed.Id, restoredMessage.ConversationId);
+        Assert.Equal(savedMessage.Content, restoredMessage.Content);
+        Assert.Equal(savedMessage.SentAt, restoredMessage.SentAt);
+        Assert.Empty(chats[0].Messages);
+        Assert.Empty(chats[2].Messages);
+        Assert.Empty(await repository.GetAllAsync(userId: 44));
+        database.AssertAllContextsDisposed();
+    }
+
+    [Theory]
+    [InlineData(0)]
+    [InlineData(-1)]
+    public async Task GetAllAsync_rejects_invalid_user_ids(int userId)
+    {
+        await using var database = await SqliteTestDatabase.CreateAsync();
+        var repository = new SqliteConversationRepository(database);
+
+        await Assert.ThrowsAsync<ArgumentOutOfRangeException>(() => repository.GetAllAsync(userId));
+        database.AssertAllContextsDisposed();
+    }
+
+    [Fact]
     public async Task AddAsync_then_GetAsync_restores_identifiers_roles_order_status_and_utc_timestamps()
     {
         await using var database = await SqliteTestDatabase.CreateAsync();

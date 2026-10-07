@@ -78,6 +78,24 @@ public sealed class SqliteConversationRepository : IConversationRepository
     }
 
     /// <inheritdoc />
+    public async Task<IReadOnlyList<DomainConversation>> GetAllAsync(int userId, CancellationToken cancellationToken = default)
+    {
+        ValidateUserId(userId);
+        await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
+
+        var entities = await dbContext.Conversations
+            .AsNoTracking()
+            .Include(conversation => conversation.Messages)
+            .Where(conversation => conversation.UserId == userId)
+            .OrderByDescending(conversation => conversation.LastUpdated)
+            // Database keys give a stable order when activity timestamps match.
+            .ThenByDescending(conversation => conversation.ConversationId)
+            .ToListAsync(cancellationToken);
+
+        return entities.Select(ToDomain).ToArray();
+    }
+
+    /// <inheritdoc />
     public async Task<DomainConversation?> GetLatestActiveAsync(int userId, CancellationToken cancellationToken = default)
     {
         ValidateUserId(userId);

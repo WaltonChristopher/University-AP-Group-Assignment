@@ -1,18 +1,31 @@
-<aside class="yp-sidebar">
-    <nav class="yp-sidebar__nav">
-        <button class="yp-sidebar__item yp-sidebar__item--active">
-            <span class="yp-sidebar__icon" aria-hidden="true">&#128337;</span>
-            Previous inquiries
-        </button>
+@using System.Globalization
+@using Yodaphone.Web.Domain
 
-        @foreach (var inquiry in PastInquiries)
+<aside class="yp-sidebar">
+    <h2 class="yp-sidebar__heading">
+        <span class="yp-sidebar__icon" aria-hidden="true">&#128337;</span>
+        Conversations
+    </h2>
+
+    <nav class="yp-sidebar__nav" aria-label="Conversations">
+        @foreach (var conversation in Conversations)
         {
-            <button class="yp-sidebar__inquiry" title="@inquiry">@inquiry</button>
+            var isSelected = conversation.Id == SelectedConversationId;
+            <button @key="conversation.Id" type="button"
+                    class="yp-sidebar__inquiry @(isSelected ? "yp-sidebar__inquiry--active" : "")"
+                    aria-current="@(isSelected ? "true" : null)" title="@GetFirstCustomerText(conversation)"
+                    disabled="@IsBusy" @onclick="() => OnConversationSelected.InvokeAsync(conversation.Id)">
+                @GetPreview(conversation)
+            </button>
+        }
+        @if (Conversations.Count == 0)
+        {
+            <p class="yp-sidebar__empty">No conversations yet.</p>
         }
     </nav>
 
     <div class="yp-sidebar__footer">
-        <button class="yp-sidebar__item" @onclick="OnHelpRequested">
+        <button class="yp-sidebar__item" @onclick="OnHelpRequested" disabled="@(IsBusy || !CanShowHelp)">
             <span class="yp-sidebar__icon" aria-hidden="true">&#63;</span>
             Help
         </button>
@@ -25,16 +38,27 @@
 </aside>
 
 @code {
+    [Parameter] public IReadOnlyList<Conversation> Conversations { get; set; } = Array.Empty<Conversation>();
+    [Parameter] public Guid? SelectedConversationId { get; set; }
+    [Parameter] public EventCallback<Guid> OnConversationSelected { get; set; }
+    [Parameter] public bool IsBusy { get; set; }
+    [Parameter] public bool CanShowHelp { get; set; } = true;
     [Parameter] public bool DarkMode { get; set; }
     [Parameter] public EventCallback OnDarkModeToggled { get; set; }
     [Parameter] public EventCallback OnHelpRequested { get; set; }
 
-    private static readonly string[] PastInquiries =
+    private static string GetFirstCustomerText(Conversation conversation) =>
+        conversation.Messages.FirstOrDefault(message => message.Role == MessageRole.Customer)?.Content ?? "New conversation";
+
+    private static string GetPreview(Conversation conversation)
     {
-        "Billing question — Aug 12",
-        "SIM activation issue",
-        "Roaming plan upgrade"
-    };
+        // Limit by visible characters so previews cannot split an emoji or accent.
+        var text = new StringInfo(GetFirstCustomerText(conversation));
+        const int previewLength = 40;
+        return text.LengthInTextElements > previewLength
+            ? text.SubstringByTextElements(0, previewLength) + "…"
+            : text.String;
+    }
 
     private async Task ToggleDarkMode()
     {

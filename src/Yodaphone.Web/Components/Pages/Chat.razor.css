@@ -68,11 +68,6 @@
     white-space: nowrap;
 }
 
-.yp-header__new-chat:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-}
-
 .yp-body {
     display: flex;
     flex: 1;
@@ -95,6 +90,12 @@
     color: var(--yp-text-on-chat);
     background: var(--yp-surface-chat);
     border-left: 4px solid var(--yp-danger);
+}
+
+.yp-chat-status {
+    flex: 0 0 auto;
+    margin: 0;
+    font-size: 0.85rem;
 }
 
 @media (max-width: 1000px) {
@@ -133,5 +134,9 @@
     .yp-main {
         gap: 0.65rem;
         padding: 0.65rem;
+    }
+
+    .yp-body {
+        flex-direction: column;
     }
 }

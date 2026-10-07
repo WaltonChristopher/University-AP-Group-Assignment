@@ -71,6 +71,20 @@ public class ChatService : IChatService
     }
 
     /// <inheritdoc />
+    public async Task<IReadOnlyList<Conversation>> GetConversationsAsync(CancellationToken cancellationToken = default)
+    {
+        await operationLock.WaitAsync(cancellationToken);
+        try
+        {
+            return await conversationRepository.GetAllAsync(currentUser.UserId, cancellationToken);
+        }
+        finally
+        {
+            operationLock.Release();
+        }
+    }
+
+    /// <inheritdoc />
     public async Task<Conversation?> GetActiveConversationAsync(CancellationToken cancellationToken = default)
     {
         await operationLock.WaitAsync(cancellationToken);

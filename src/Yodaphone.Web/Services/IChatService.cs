@@ -11,6 +11,10 @@ public interface IChatService
     /// <summary>
     /// Creates and persists an empty, active conversation for the current user.
     /// </summary>
+    /// <remarks>
+    /// Each call creates a new conversation ID with the same current user ID.
+    /// Existing conversations and their messages are retained.
+    /// </remarks>
     Task<Conversation> StartConversationAsync(
         CancellationToken cancellationToken = default
     );
@@ -22,6 +26,15 @@ public interface IChatService
     /// <exception cref="KeyNotFoundException">The conversation does not exist or belongs to another user.</exception>
     Task<Conversation> GetConversationAsync(
         string conversationId,
+        CancellationToken cancellationToken = default
+    );
+
+    /// <summary>
+    /// Loads all of the current user's conversations and their messages, including
+    /// closed conversations, ordered by most recent activity first.
+    /// </summary>
+    /// <returns>An empty list if the current user has no conversations.</returns>
+    Task<IReadOnlyList<Conversation>> GetConversationsAsync(
         CancellationToken cancellationToken = default
     );
 

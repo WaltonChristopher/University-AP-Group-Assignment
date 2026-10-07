@@ -31,6 +31,15 @@ public interface IConversationRepository
     Task<Conversation?> GetAsync(Guid conversationId, int userId, CancellationToken cancellationToken = default);
 
     /// <summary>
+    /// Loads all conversations and their ordered messages for the specified owner,
+    /// including closed conversations, ordered by most recent activity first.
+    /// </summary>
+    /// <param name="userId">The positive, server-trusted ID of the conversation owner.</param>
+    /// <param name="cancellationToken">Cancels the database operation.</param>
+    /// <returns>An empty list if the owner has no conversations.</returns>
+    Task<IReadOnlyList<Conversation>> GetAllAsync(int userId, CancellationToken cancellationToken = default);
+
+    /// <summary>
     /// Loads the owner's open conversation with the most recent activity timestamp.
     /// </summary>
     /// <param name="userId">The positive, server-trusted ID of the conversation owner.</param>

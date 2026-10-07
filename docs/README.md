@@ -152,6 +152,10 @@ Each message has both a `SenderId` and a `ConversationId`, associating it with a
 
 Timestamps are stored in UTC, and the conversation's closed status and message order are restored on load.
 
+Each call to `IChatService.StartConversationAsync()` creates a fresh conversation GUID owned by the same current user, retaining previous chats. `GetConversationsAsync()` returns that user's active and closed conversations with their messages, ordered by most recent activity first; it returns an empty list for a user with no chats. `GetConversationAsync(conversationId)` loads an individual chat owned by that user. Starting another conversation does not close the previous one; closing remains a separate operation.
+
+The owner ID comes from `ICurrentUser`. Development currently uses `Chat:DevelopmentUserId` (default `1`); authentication can replace that identity source later. These backend methods are ready for a future chat history UI.
+
 `Message.Status` stores the message role (`Customer`, `Assistant`, or `System`), while `SenderId` references the conversation owner for all three roles.
 
 The conversation repository uses `IDbContextFactory<ApplicationDbContext>` to create and dispose a database context for each operation. This prevents a context and its tracked entities from living for the whole Blazor circuit. Customer messages are committed before requesting an AI reply, and assistant replies are saved afterward, so an AI failure or cancellation retains the customer message without holding a database context open during the network call.

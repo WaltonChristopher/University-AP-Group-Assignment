@@ -1,3 +1,4 @@
+using Microsoft.EntityFrameworkCore;
 using Xunit;
 using Yodaphone.Web.Chat;
 using Yodaphone.Web.Chat.Agents;
@@ -8,6 +9,101 @@ namespace Yodaphone.Web.Tests.Services;
 
 public sealed class ChatServicePersistenceTests
 {
+    [Fact]
+    public async Task StartConversationAsync_creates_distinct_empty_chats_for_the_same_user()
+    {
+        await using var database = await SqliteTestDatabase.CreateAsync();
+        var repository = new SqliteConversationRepository(database);
+        var service = new ChatService(new OfflineChatAgent(), repository, new TestCurrentUser());
+        var first = await service.StartConversationAsync();
+        await service.AddMessageAsync(first.Id.ToString(), MessageRole.Customer, "First chat");
+
+        // A new service instance must retain the same owner rather than create a new user.
+        var reloadedService = new ChatService(new OfflineChatAgent(), repository, new TestCurrentUser());
+        var second = await reloadedService.StartConversationAsync();
+
+        Assert.NotEqual(Guid.Empty, second.Id);
+        Assert.NotEqual(first.Id, second.Id);
+        Assert.Empty(second.Messages);
+        Assert.Equal(ConversationStatus.Active, second.Status);
+        var restoredFirst = await reloadedService.GetConversationAsync(first.Id.ToString());
+        Assert.Equal(ConversationStatus.Active, restoredFirst.Status);
+        Assert.Equal("First chat", Assert.Single(restoredFirst.Messages).Content);
+        var restoredSecond = await reloadedService.GetConversationAsync(second.Id.ToString());
+        Assert.Empty(restoredSecond.Messages);
+
+        await using (var context = database.CreateDbContext())
+        {
+            Assert.Equal(42, (await context.Users.SingleAsync()).UserId);
+            var stored = await context.Conversations.ToListAsync();
+            Assert.Equal(2, stored.Count);
+            Assert.All(stored, conversation => Assert.Equal(42, conversation.UserId));
+            Assert.Equal(2, stored.Select(conversation => conversation.ConversationId).Distinct().Count());
+            Assert.Contains(stored, conversation => conversation.Id == first.Id);
+            Assert.Contains(stored, conversation => conversation.Id == second.Id);
+        }
+        database.AssertAllContextsDisposed();
+    }
+
+    [Fact]
+    public async Task SendMessageAsync_keeps_each_chats_agent_history_separate()
+    {
+        await using var database = await SqliteTestDatabase.CreateAsync();
+        var histories = new List<ChatMessage[]>();
+        var agent = new CallbackAgent((history, _) =>
+        {
+            histories.Add(history.ToArray());
+            return Task.FromResult(new AgentChatResponse { Content = "Reply" });
+        });
+        var service = new ChatService(agent, new SqliteConversationRepository(database), new TestCurrentUser());
+        var first = await service.StartConversationAsync();
+        await service.SendMessageAsync(first.Id.ToString(), "First chat");
+        var second = await service.StartConversationAsync();
+        await service.SendMessageAsync(second.Id.ToString(), "Second chat");
+        await service.SendMessageAsync(first.Id.ToString(), "Back to first");
+
+        Assert.Equal(3, histories.Count);
+        Assert.Equal("First chat", Assert.Single(histories[0]).Content);
+        Assert.Equal("Second chat", Assert.Single(histories[1]).Content);
+        Assert.Equal(new[] { "First chat", "Reply", "Back to first" }, histories[2].Select(message => message.Content));
+        Assert.All(histories[2], message => Assert.Equal(first.Id, message.ConversationId));
+        var restoredSecond = await service.GetConversationAsync(second.Id.ToString());
+        Assert.Equal(new[] { "Second chat", "Reply" }, restoredSecond.Messages.Select(message => message.Content));
+        database.AssertAllContextsDisposed();
+    }
+
+    [Fact]
+    public async Task GetConversationsAsync_restores_active_and_closed_chats_only_for_the_current_user()
+    {
+        await using var database = await SqliteTestDatabase.CreateAsync();
+        var repository = new SqliteConversationRepository(database);
+        var service = new ChatService(new OfflineChatAgent(), repository, new TestCurrentUser());
+        var first = await service.StartConversationAsync();
+        await service.AddMessageAsync(first.Id.ToString(), MessageRole.Customer, "Saved first chat");
+        await service.CloseConversationAsync(first.Id.ToString());
+        var second = await service.StartConversationAsync();
+        await service.AddMessageAsync(second.Id.ToString(), MessageRole.Customer, "Saved second chat");
+        var otherService = new ChatService(new OfflineChatAgent(), repository, new TestCurrentUser(43));
+        var otherChat = await otherService.StartConversationAsync();
+        var reloadedService = new ChatService(new OfflineChatAgent(), repository, new TestCurrentUser());
+
+        var chats = await reloadedService.GetConversationsAsync();
+
+        Assert.Equal(new[] { second.Id, first.Id }, chats.Select(conversation => conversation.Id));
+        Assert.Equal("Saved second chat", Assert.Single(chats[0].Messages).Content);
+        Assert.Equal(ConversationStatus.Active, chats[0].Status);
+        Assert.Equal("Saved first chat", Assert.Single(chats[1].Messages).Content);
+        Assert.Equal(ConversationStatus.Closed, chats[1].Status);
+        var restoredFirst = await reloadedService.GetConversationAsync(first.Id.ToString());
+        Assert.Equal(chats[1].Messages.Single().Id, Assert.Single(restoredFirst.Messages).Id);
+        Assert.Equal(otherChat.Id, Assert.Single(await otherService.GetConversationsAsync()).Id);
+        await Assert.ThrowsAsync<KeyNotFoundException>(() => reloadedService.GetConversationAsync(otherChat.Id.ToString()));
+        await Assert.ThrowsAsync<KeyNotFoundException>(() => otherService.GetConversationAsync(first.Id.ToString()));
+        var newUserService = new ChatService(new OfflineChatAgent(), repository, new TestCurrentUser(44));
+        Assert.Empty(await newUserService.GetConversationsAsync());
+        database.AssertAllContextsDisposed();
+    }
+
     [Fact]
     public async Task SendMessageAsync_commits_customer_before_agent_call_and_saves_reply_afterward()
     {
@@ -91,8 +187,8 @@ public sealed class ChatServicePersistenceTests
             callback(history, cancellationToken);
     }
 
-    private sealed class TestCurrentUser : ICurrentUser
+    private sealed class TestCurrentUser(int userId = 42) : ICurrentUser
     {
-        public int UserId => 42;
+        public int UserId => userId;
     }
 }

@@ -6,13 +6,13 @@
         value="@_draft"
         @oninput="OnDraftChanged"
         @onkeydown="OnKeyDown"
-        disabled="@IsSending">
+        disabled="@(IsSending || IsDisabled)">
     </textarea>
 
     <button
         class="yp-btn yp-btn--solid yp-input-bar__send"
         @onclick="Send"
-        disabled="@(IsSending || string.IsNullOrWhiteSpace(_draft))">
+        disabled="@(IsSending || IsDisabled || string.IsNullOrWhiteSpace(_draft))">
         @(IsSending ? "Sending…" : "Send")
     </button>
 </div>
@@ -20,6 +20,7 @@
 @code {
     [Parameter] public EventCallback<string> OnMessageSent { get; set; }
     [Parameter] public bool IsSending { get; set; }
+    [Parameter] public bool IsDisabled { get; set; }
 
     private string _draft = string.Empty;
 
@@ -39,7 +40,7 @@
 
     private async Task Send()
     {
-        if (IsSending || string.IsNullOrWhiteSpace(_draft))
+        if (IsSending || IsDisabled || string.IsNullOrWhiteSpace(_draft))
         {
             return;
         }
