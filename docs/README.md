@@ -68,13 +68,15 @@ The database schema is managed using Entity Framework Core migrations.
 
 #### First-time setup
 
-Install the Entity Framework Core command-line tools:
+The Dev Container automatically restores the Entity Framework Core command-line tools during creation. For an existing container, select **Dev Containers: Rebuild Container** in VS Code, or run the following from the repository root. Developers working outside the container should also run this command:
 
 ```bash
-dotnet tool install --global dotnet-ef
+dotnet tool restore
 ```
 
-Verify the installation:
+The tool version is pinned in `.config/dotnet-tools.json` to match the project's Entity Framework Core packages. Update both together when upgrading Entity Framework Core.
+
+Verify the installation from the repository root:
 
 ```bash
 dotnet ef --version
