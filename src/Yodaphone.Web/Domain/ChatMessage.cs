@@ -27,4 +27,7 @@ public sealed class ChatMessage
         Content = content;
         SentAt = DateTimeOffset.UtcNow;
     }
+
+    public bool IsFromAgent => Role == MessageRole.Assistant;
+
 }

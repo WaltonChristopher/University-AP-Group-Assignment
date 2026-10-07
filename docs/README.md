@@ -63,6 +63,25 @@ Then you can build the solution: `dotnet build Yodaphone.sln`.
 
 Finally you can run the solution: `dotnet watch --project src/Yodaphone.Web --no-launch-profile`. This will update live as you make changes.
 
+### GitHub Copilot authentication
+
+The browser does not authenticate directly with Copilot. The Blazor server starts the
+Copilot runtime, so configure a GitHub token for a Copilot-entitled service/developer
+account on the server. Do not place it in `appsettings.json`, JavaScript, or a browser
+cookie.
+
+For local development, store it in user secrets:
+
+```bash
+dotnet user-secrets set "Chat:Copilot:GitHubToken" "YOUR_GITHUB_TOKEN" --project src/Yodaphone.Web
+```
+
+For a deployed app, set the equivalent environment variable in the server's secret
+store: `Chat__Copilot__GitHubToken`. The SDK gives this explicit token precedence over
+any local GitHub CLI/Copilot login. If no token is configured, local development can
+fall back to an existing logged-in GitHub CLI/Copilot runtime identity; that fallback is
+not appropriate for a shared or production server.
+
 ## The Assignment Task
 
 ### Task
