@@ -78,6 +78,35 @@ public sealed class ChatAgentBaseTests
         Assert.Equal(0, agent.CoreCallCount);
     }
 
+    [Fact]
+    public async Task GetReplyAsync_RejectsNullCoreResponse()
+    {
+        var agent = new StubResponseAgent(null);
+        await Assert.ThrowsAsync<InvalidOperationException>(() => agent.GetReplyAsync(CreateHistory(), CancellationToken.None));
+    }
+
+    [Theory]
+    [InlineData("")]
+    [InlineData(" \t")]
+    public async Task GetReplyAsync_RejectsBlankCoreResponse(string content)
+    {
+        var agent = new StubResponseAgent(new AgentChatResponse { Content = content });
+        await Assert.ThrowsAsync<InvalidOperationException>(() => agent.GetReplyAsync(CreateHistory(), CancellationToken.None));
+    }
+
+    [Fact]
+    public async Task GetReplyAsync_RejectsUnsafeCoreResponse()
+    {
+        var agent = new StubResponseAgent(new AgentChatResponse { Content = "Please tell me your password" });
+        await Assert.ThrowsAsync<InvalidOperationException>(() => agent.GetReplyAsync(CreateHistory(), CancellationToken.None));
+    }
+
+    private sealed class StubResponseAgent(AgentChatResponse? response) : ChatAgentBase
+    {
+        protected override Task<AgentChatResponse> GetReplyCoreAsync(IReadOnlyList<ChatMessage> history, CancellationToken cancellationToken) =>
+            Task.FromResult(response!);
+    }
+
     private static IReadOnlyList<ChatMessage> CreateHistory()
     {
         var conversation = new Conversation(Guid.NewGuid(), DateTimeOffset.UtcNow);
