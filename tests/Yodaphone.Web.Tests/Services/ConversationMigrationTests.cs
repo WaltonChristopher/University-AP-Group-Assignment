@@ -9,6 +9,43 @@ namespace Yodaphone.Web.Tests.Services;
 
 public sealed class ConversationMigrationTests
 {
+    [Fact]
+    public async Task Migrations_CanRollbackAndReapplySchema()
+    {
+        await using var database = await SqliteTestDatabase.CreateAsync();
+        await using var context = database.CreateDbContext();
+        var migrator = context.GetService<IMigrator>();
+        await migrator.MigrateAsync("0");
+        Assert.Empty(await context.Database.GetAppliedMigrationsAsync());
+        await migrator.MigrateAsync();
+        Assert.Equal(3, (await context.Database.GetAppliedMigrationsAsync()).Count());
+        Assert.Empty(await context.Database.GetPendingMigrationsAsync());
+        var repository = new SqliteConversationRepository(database);
+        var conversation = new Conversation(Guid.NewGuid(), DateTimeOffset.UtcNow);
+        conversation.AddMessage(MessageRole.Customer, "Schema restored");
+        await repository.AddAsync(conversation, 42);
+        var restored = await repository.GetAsync(conversation.Id, 42);
+        Assert.NotNull(restored);
+        Assert.Equal("Schema restored", Assert.Single(restored.Messages).Content);
+    }
+
+    [Fact]
+    public async Task PersistedMessages_RestoreSenderAndUserNavigationRelationships()
+    {
+        await using var database = await SqliteTestDatabase.CreateAsync();
+        var conversation = new Conversation(Guid.NewGuid(), DateTimeOffset.UtcNow);
+        conversation.AddMessage(MessageRole.Customer, "Saved customer message");
+        await new SqliteConversationRepository(database).AddAsync(conversation, 42);
+        await using var context = database.CreateDbContext();
+        var user = await context.Users.Include(user => user.Messages).Include(user => user.Conversations).SingleAsync();
+        Assert.False(user.Support);
+        var message = Assert.Single(user.Messages);
+        Assert.Same(user, message.Sender);
+        Assert.Equal(42, message.SenderId);
+        Assert.Same(Assert.Single(user.Conversations), message.Conversation);
+        Assert.Equal("Saved customer message", message.MessageContent);
+    }
+
     [Theory]
     [InlineData(false)]
     [InlineData(true)]

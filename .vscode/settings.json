@@ -1,0 +1,6 @@
+{
+  "coverage-gutters.coverageBaseDir": "coverage/report",
+  "coverage-gutters.coverageFileNames": ["Cobertura.xml"],
+  "coverage-gutters.coverageReportFileName": "coverage/report/index.html",
+  "coverage-gutters.watchOnActivate": true
+}

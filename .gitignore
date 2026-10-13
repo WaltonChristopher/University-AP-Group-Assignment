@@ -40,8 +40,10 @@ Logs/
 
 ## IDE and OS files
 .idea/
-.vscode/
+.vscode/*
 !.vscode/extensions.json
+!.vscode/settings.json
+!.vscode/tasks.json
 *.swp
 .DS_Store
 Thumbs.db
