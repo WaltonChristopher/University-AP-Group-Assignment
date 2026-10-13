@@ -517,6 +517,24 @@ Use the Arrange–Act–Assert structure:
 
 Add a test project through VS Code by selecting the solution and creating an **xUnit Test Project**, then add the relevant project reference. Run all tests with `dotnet test Yodaphone.sln`.
 
+The web test project contains service/database integration tests, an
+`WebApplicationFactory` HTTP integration test, and a Playwright browser journey.
+The HTTP and browser tests use temporary SQLite databases and the offline chat
+agent; they do not require Copilot credentials or modify the development database.
+
+Install the Playwright Chromium browser once after restoring/building the solution:
+
+```bash
+pwsh tests/Yodaphone.Web.Tests/bin/Debug/net10.0/playwright.ps1 install chromium
+```
+
+Then run the browser journey together with the other tests using
+`dotnet test Yodaphone.sln`, or run just the browser tests with:
+
+```bash
+dotnet test tests/Yodaphone.Web.Tests/Yodaphone.Web.Tests.csproj --filter "Category=EndToEnd"
+```
+
 ## Git teamwork
 
 Before starting work:
@@ -623,4 +641,3 @@ Run **Dev Containers: Rebuild and Reopen in Container**. Reloading the VS Code w
 - [Dependency injection in ASP.NET Core](https://learn.microsoft.com/aspnet/core/fundamentals/dependency-injection)
 - [Unit testing C# with `dotnet test`](https://learn.microsoft.com/dotnet/core/testing/unit-testing-with-dotnet-test)
 - [Safe storage of development secrets](https://learn.microsoft.com/aspnet/core/security/app-secrets)
-
