@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Logging.Abstractions;
 using Xunit;
 using Yodaphone.Web.Chat;
 using Yodaphone.Web.Chat.Agents;
@@ -12,13 +13,21 @@ public sealed class ChatServiceValidationTests
     [InlineData("agent")]
     [InlineData("repository")]
     [InlineData("user")]
+    [InlineData("logger")]
     public void Constructor_RejectsMissingDependencies(string missing)
     {
         var exception = Assert.Throws<ArgumentNullException>(() => new ChatService(
             missing == "agent" ? null! : new OfflineChatAgent(),
             missing == "repository" ? null! : new UnusedRepository(),
-            missing == "user" ? null! : new CurrentUser()));
-        Assert.Equal(missing switch { "agent" => "chatAgent", "repository" => "conversationRepository", _ => "currentUser" }, exception.ParamName);
+            missing == "user" ? null! : new CurrentUser(),
+            missing == "logger" ? null! : NullLogger<ChatService>.Instance));
+        Assert.Equal(missing switch
+        {
+            "agent" => "chatAgent",
+            "repository" => "conversationRepository",
+            "user" => "currentUser",
+            _ => "logger"
+        }, exception.ParamName);
     }
 
     [Theory]
@@ -93,7 +102,7 @@ public sealed class ChatServiceValidationTests
     }
 
     private static ChatService CreateService(SqliteTestDatabase database, IChatAgent? agent = null) =>
-        new(agent ?? new OfflineChatAgent(), new SqliteConversationRepository(database), new CurrentUser());
+        new(agent ?? new OfflineChatAgent(), new SqliteConversationRepository(database), new CurrentUser(), NullLogger<ChatService>.Instance);
 
     private sealed class CurrentUser : ICurrentUser { public int UserId => 42; }
     private sealed class CallbackAgent(Func<CancellationToken, Task<AgentChatResponse>> reply) : IChatAgent
