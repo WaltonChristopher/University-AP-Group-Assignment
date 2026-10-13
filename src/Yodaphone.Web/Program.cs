@@ -5,7 +5,7 @@ using Yodaphone.Web.Services;
 using Yodaphone.Web.Chat.Agents;
 using Yodaphone.Web.Chat.Agents.Copilot;
 
-public static class Program
+public partial class Program
 {
     public static void Main(string[] args)
     {
