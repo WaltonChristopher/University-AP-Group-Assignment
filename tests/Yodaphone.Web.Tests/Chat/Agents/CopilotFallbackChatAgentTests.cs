@@ -65,8 +65,8 @@ public sealed class CopilotFallbackChatAgentTests
         for (var attempt = 0; attempt < 2; attempt++)
         {
             var response = await agent.GetReplyAsync(CreateHistory(), CancellationToken.None);
-            Assert.Contains("couldn't provide that response", response.Content);
-            Assert.Contains("chat safety rules", response.Content);
+            Assert.StartsWith("Sorry, I can't assist with that.", response.Content);
+            Assert.Contains("Please contact the support team on 01632 960123 or ask something else.", response.Content);
             Assert.DoesNotContain(content, response.Content);
         }
 

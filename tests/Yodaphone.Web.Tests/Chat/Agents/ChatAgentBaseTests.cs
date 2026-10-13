@@ -101,9 +101,9 @@ public sealed class ChatAgentBaseTests
 
         var response = await agent.GetReplyAsync(CreateHistory(), CancellationToken.None);
 
-        Assert.Equal(
-            "We couldn't provide that response because it did not meet our chat safety rules. " +
-            "Please rephrase your question or ask something else.", response.Content);
+        Assert.StartsWith("Sorry, I can't assist with that.", response.Content);
+        Assert.Contains("Please contact the support team on 01632 960123 or ask something else.", response.Content);
+        Assert.DoesNotContain("password", response.Content, StringComparison.OrdinalIgnoreCase);
     }
 
     private sealed class StubResponseAgent(AgentChatResponse? response) : ChatAgentBase

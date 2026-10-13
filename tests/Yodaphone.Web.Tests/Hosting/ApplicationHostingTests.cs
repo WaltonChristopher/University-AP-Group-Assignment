@@ -126,7 +126,9 @@ public sealed class ApplicationHostingTests
         var conversation = await service.StartConversationAsync();
 
         var reply = await service.SendMessageAsync(conversation.Id.ToString(), "Help with my account");
-        Assert.Contains("couldn't provide that response", reply.Content);
+        Assert.StartsWith("Sorry, I can't assist with that.", reply.Content);
+        Assert.Contains("Please contact the support team on 01632 960123 or ask something else.", reply.Content);
+        Assert.DoesNotContain(blockedContent, reply.Content);
         copilotFactory.Response = FakeCopilotClientFactory.CreateResponse("How can I help?");
         var nextReply = await service.SendMessageAsync(conversation.Id.ToString(), "Help with my bill");
 
