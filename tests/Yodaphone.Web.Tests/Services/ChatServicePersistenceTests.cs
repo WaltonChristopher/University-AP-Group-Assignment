@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging.Abstractions;
 using Xunit;
 using Yodaphone.Web.Chat;
 using Yodaphone.Web.Chat.Agents;
@@ -14,12 +15,12 @@ public sealed class ChatServicePersistenceTests
     {
         await using var database = await SqliteTestDatabase.CreateAsync();
         var repository = new SqliteConversationRepository(database);
-        var service = new ChatService(new OfflineChatAgent(), repository, new TestCurrentUser());
+        var service = new ChatService(new OfflineChatAgent(), repository, new TestCurrentUser(), NullLogger<ChatService>.Instance);
         var first = await service.StartConversationAsync();
         await service.AddMessageAsync(first.Id.ToString(), MessageRole.Customer, "First chat");
 
         // A new service instance must retain the same owner rather than create a new user.
-        var reloadedService = new ChatService(new OfflineChatAgent(), repository, new TestCurrentUser());
+        var reloadedService = new ChatService(new OfflineChatAgent(), repository, new TestCurrentUser(), NullLogger<ChatService>.Instance);
         var second = await reloadedService.StartConversationAsync();
 
         Assert.NotEqual(Guid.Empty, second.Id);
@@ -55,7 +56,7 @@ public sealed class ChatServicePersistenceTests
             histories.Add(history.ToArray());
             return Task.FromResult(new AgentChatResponse { Content = "Reply" });
         });
-        var service = new ChatService(agent, new SqliteConversationRepository(database), new TestCurrentUser());
+        var service = new ChatService(agent, new SqliteConversationRepository(database), new TestCurrentUser(), NullLogger<ChatService>.Instance);
         var first = await service.StartConversationAsync();
         await service.SendMessageAsync(first.Id.ToString(), "First chat");
         var second = await service.StartConversationAsync();
@@ -77,15 +78,15 @@ public sealed class ChatServicePersistenceTests
     {
         await using var database = await SqliteTestDatabase.CreateAsync();
         var repository = new SqliteConversationRepository(database);
-        var service = new ChatService(new OfflineChatAgent(), repository, new TestCurrentUser());
+        var service = new ChatService(new OfflineChatAgent(), repository, new TestCurrentUser(), NullLogger<ChatService>.Instance);
         var first = await service.StartConversationAsync();
         await service.AddMessageAsync(first.Id.ToString(), MessageRole.Customer, "Saved first chat");
         await service.CloseConversationAsync(first.Id.ToString());
         var second = await service.StartConversationAsync();
         await service.AddMessageAsync(second.Id.ToString(), MessageRole.Customer, "Saved second chat");
-        var otherService = new ChatService(new OfflineChatAgent(), repository, new TestCurrentUser(43));
+        var otherService = new ChatService(new OfflineChatAgent(), repository, new TestCurrentUser(43), NullLogger<ChatService>.Instance);
         var otherChat = await otherService.StartConversationAsync();
-        var reloadedService = new ChatService(new OfflineChatAgent(), repository, new TestCurrentUser());
+        var reloadedService = new ChatService(new OfflineChatAgent(), repository, new TestCurrentUser(), NullLogger<ChatService>.Instance);
 
         var chats = await reloadedService.GetConversationsAsync();
 
@@ -99,7 +100,7 @@ public sealed class ChatServicePersistenceTests
         Assert.Equal(otherChat.Id, Assert.Single(await otherService.GetConversationsAsync()).Id);
         await Assert.ThrowsAsync<KeyNotFoundException>(() => reloadedService.GetConversationAsync(otherChat.Id.ToString()));
         await Assert.ThrowsAsync<KeyNotFoundException>(() => otherService.GetConversationAsync(first.Id.ToString()));
-        var newUserService = new ChatService(new OfflineChatAgent(), repository, new TestCurrentUser(44));
+        var newUserService = new ChatService(new OfflineChatAgent(), repository, new TestCurrentUser(44), NullLogger<ChatService>.Instance);
         Assert.Empty(await newUserService.GetConversationsAsync());
         database.AssertAllContextsDisposed();
     }
@@ -123,7 +124,7 @@ public sealed class ChatServicePersistenceTests
             database.AssertAllContextsDisposed();
             return new AgentChatResponse { Content = "How can I help?" };
         });
-        var service = new ChatService(agent, new SqliteConversationRepository(database), new TestCurrentUser());
+        var service = new ChatService(agent, new SqliteConversationRepository(database), new TestCurrentUser(), NullLogger<ChatService>.Instance);
         conversationId = (await service.StartConversationAsync()).Id;
 
         var reply = await service.SendMessageAsync(conversationId.ToString(), " Hello ");
@@ -158,7 +159,7 @@ public sealed class ChatServicePersistenceTests
             }
             throw new InvalidOperationException("Agent unavailable");
         });
-        var service = new ChatService(agent, new SqliteConversationRepository(database), new TestCurrentUser());
+        var service = new ChatService(agent, new SqliteConversationRepository(database), new TestCurrentUser(), NullLogger<ChatService>.Instance);
         var conversation = await service.StartConversationAsync();
 
         if (cancel)
@@ -193,8 +194,8 @@ public sealed class ChatServicePersistenceTests
             await releaseReply.Task.WaitAsync(cancellationToken);
             return new AgentChatResponse { Content = "Late reply" };
         });
-        var sendingService = new ChatService(agent, new SqliteConversationRepository(database), new TestCurrentUser());
-        var closingService = new ChatService(new OfflineChatAgent(), new SqliteConversationRepository(database), new TestCurrentUser());
+        var sendingService = new ChatService(agent, new SqliteConversationRepository(database), new TestCurrentUser(), NullLogger<ChatService>.Instance);
+        var closingService = new ChatService(new OfflineChatAgent(), new SqliteConversationRepository(database), new TestCurrentUser(), NullLogger<ChatService>.Instance);
         var conversation = await sendingService.StartConversationAsync();
         var sending = sendingService.SendMessageAsync(conversation.Id.ToString(), "Hello");
 

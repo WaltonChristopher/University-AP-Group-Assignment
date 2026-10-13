@@ -36,6 +36,7 @@ coverage/
 artifacts/
 TestResults/
 *.log
+Logs/
 
 ## IDE and OS files
 .idea/

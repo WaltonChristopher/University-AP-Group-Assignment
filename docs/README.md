@@ -174,6 +174,44 @@ dotnet user-secrets set "Chat:Copilot:GitHubToken" "YOUR_GITHUB_TOKEN" --project
 
 For a deployed app, set the equivalent environment variable in the server's secret store: `Chat__Copilot__GitHubToken`. The SDK gives this explicit token precedence over any local GitHub CLI/Copilot login. If no token is configured, local development can fall back to an existing logged-in GitHub CLI/Copilot runtime identity. *This fallback is not appropriate for a shared or production server.*
 
+### Error logging
+
+Serilog sends application and framework logs to the server console and to
+`Logs/app-YYYYMMDD.log` under the application's content root. With the normal
+`dotnet run --project src/Yodaphone.Web` command, this is
+`src/Yodaphone.Web/Logs/`. Logs roll daily and whenever a file reaches 10 MiB;
+the newest 14 files are retained. The log directory is excluded from Git.
+The server process needs write access to this directory.
+
+Each entry includes its timestamp, severity, logger category, structured
+properties, and exception stack trace when present. HTTP completion logs contain
+the method, path, status, duration, and request ID. The request ID displayed by
+the HTTP error page can be used to find the corresponding request log.
+Blazor chat actions run through `ChatService`, which logs failed operations at
+Error level with an operation ID, operation name, validated conversation ID, and
+agent type. This covers persistence, conversation rules, and AI failures,
+including inner exceptions retained by `ChatAgentException`. The UI displays
+safe error messages and does not log the same service exception again.
+Caller-requested cancellation is not an error.
+
+Startup, migration, and host failures are logged at Fatal level and set a nonzero
+process exit code. Failures before configuration or the file logger is ready
+are reported to the bootstrap console logger. Unhandled HTTP and Blazor circuit
+errors are also captured through the framework's logging integration.
+
+Log levels are configured in the `Serilog:MinimumLevel` section of
+`appsettings.json` and `appsettings.Development.json`. The default is Information,
+with ASP.NET Core and EF Core restricted to Warning and above. For example, set
+`Serilog__MinimumLevel__Override__Yodaphone.Web=Debug` in the environment to enable
+additional diagnostics for application categories. Use `ILogger<T>` and structured
+placeholders when adding logs. Log at the boundary that handles or reports the
+failure rather than catching and logging it in every layer.
+
+Application log messages and properties do not include chat text, transcripts,
+tokens, request bodies, or query strings. Exception details from dependencies can
+contain sensitive data, so keep diagnostic files access-controlled and review
+them before sharing. EF Core sensitive-data logging remains disabled.
+
 ## The Assignment Task
 
 ### Task

@@ -15,6 +15,7 @@ public class ChatService : IChatService
     private readonly IChatAgent chatAgent;
     private readonly IConversationRepository conversationRepository;
     private readonly ICurrentUser currentUser;
+    private readonly ILogger<ChatService> logger;
 
     // Serialize operations within this service instance so a close or another
     // send cannot change history while its agent response is being generated.
@@ -27,110 +28,74 @@ public class ChatService : IChatService
     /// <param name="chatAgent">Generates assistant replies from the ordered message history.</param>
     /// <param name="conversationRepository">Saves and restores conversations for their owner.</param>
     /// <param name="currentUser">Supplies the server-trusted owner ID for every operation.</param>
+    /// <param name="logger">Records operation failures and their diagnostic context.</param>
     public ChatService(
         IChatAgent chatAgent,
         IConversationRepository conversationRepository,
-        ICurrentUser currentUser)
+        ICurrentUser currentUser,
+        ILogger<ChatService> logger)
     {
         ArgumentNullException.ThrowIfNull(chatAgent);
         ArgumentNullException.ThrowIfNull(conversationRepository);
         ArgumentNullException.ThrowIfNull(currentUser);
+        ArgumentNullException.ThrowIfNull(logger);
         this.chatAgent = chatAgent;
         this.conversationRepository = conversationRepository;
         this.currentUser = currentUser;
+        this.logger = logger;
     }
 
     /// <inheritdoc />
-    public async Task<Conversation> StartConversationAsync(CancellationToken cancellationToken = default)
+    public Task<Conversation> StartConversationAsync(CancellationToken cancellationToken = default)
     {
-        await operationLock.WaitAsync(cancellationToken);
-        try
+        var conversationId = Guid.NewGuid();
+        return RunOperationAsync(nameof(StartConversationAsync), conversationId.ToString(), async () =>
         {
-            var conversation = new Conversation(Guid.NewGuid(), DateTimeOffset.UtcNow);
+            var conversation = new Conversation(conversationId, DateTimeOffset.UtcNow);
             await conversationRepository.AddAsync(conversation, currentUser.UserId, cancellationToken);
             return conversation;
-        }
-        finally
-        {
-            operationLock.Release();
-        }
+        }, cancellationToken);
     }
 
     /// <inheritdoc />
-    public async Task<Conversation> GetConversationAsync(string conversationId, CancellationToken cancellationToken = default)
-    {
-        await operationLock.WaitAsync(cancellationToken);
-        try
-        {
-            return await LoadConversationAsync(conversationId, cancellationToken);
-        }
-        finally
-        {
-            operationLock.Release();
-        }
-    }
+    public Task<Conversation> GetConversationAsync(string conversationId, CancellationToken cancellationToken = default) =>
+        RunOperationAsync(nameof(GetConversationAsync), conversationId,
+            () => LoadConversationAsync(conversationId, cancellationToken), cancellationToken);
 
     /// <inheritdoc />
-    public async Task<IReadOnlyList<Conversation>> GetConversationsAsync(CancellationToken cancellationToken = default)
-    {
-        await operationLock.WaitAsync(cancellationToken);
-        try
-        {
-            return await conversationRepository.GetAllAsync(currentUser.UserId, cancellationToken);
-        }
-        finally
-        {
-            operationLock.Release();
-        }
-    }
+    public Task<IReadOnlyList<Conversation>> GetConversationsAsync(CancellationToken cancellationToken = default) =>
+        RunOperationAsync(nameof(GetConversationsAsync), null,
+            () => conversationRepository.GetAllAsync(currentUser.UserId, cancellationToken), cancellationToken);
 
     /// <inheritdoc />
-    public async Task<Conversation?> GetActiveConversationAsync(CancellationToken cancellationToken = default)
-    {
-        await operationLock.WaitAsync(cancellationToken);
-        try
-        {
-            return await conversationRepository.GetLatestActiveAsync(currentUser.UserId, cancellationToken);
-        }
-        finally
-        {
-            operationLock.Release();
-        }
-    }
+    public Task<Conversation?> GetActiveConversationAsync(CancellationToken cancellationToken = default) =>
+        RunOperationAsync(nameof(GetActiveConversationAsync), null,
+            () => conversationRepository.GetLatestActiveAsync(currentUser.UserId, cancellationToken), cancellationToken);
 
     /// <inheritdoc />
-    public async Task<ChatMessage> AddMessageAsync(string conversationId, MessageRole role, string content, CancellationToken cancellationToken = default)
-    {
-        ArgumentException.ThrowIfNullOrWhiteSpace(content);
-        if (!Enum.IsDefined(role))
+    public Task<ChatMessage> AddMessageAsync(string conversationId, MessageRole role, string content, CancellationToken cancellationToken = default) =>
+        RunOperationAsync(nameof(AddMessageAsync), conversationId, async () =>
         {
-            throw new ArgumentOutOfRangeException(nameof(role));
-        }
+            ArgumentException.ThrowIfNullOrWhiteSpace(content);
+            if (!Enum.IsDefined(role))
+            {
+                throw new ArgumentOutOfRangeException(nameof(role));
+            }
 
-        await operationLock.WaitAsync(cancellationToken);
-        try
-        {
             var conversation = await LoadConversationAsync(conversationId, cancellationToken);
             var message = conversation.AddMessage(role, content.Trim());
             await conversationRepository.SaveAsync(conversation, currentUser.UserId, cancellationToken);
             return message;
-        }
-        finally
-        {
-            operationLock.Release();
-        }
-    }
+        }, cancellationToken);
 
     /// <inheritdoc />
-    public async Task<ChatMessage> SendMessageAsync(string conversationId, string content, CancellationToken cancellationToken = default)
-    {
-        ArgumentException.ThrowIfNullOrWhiteSpace(content);
-        await operationLock.WaitAsync(cancellationToken);
-        try
+    public Task<ChatMessage> SendMessageAsync(string conversationId, string content, CancellationToken cancellationToken = default) =>
+        RunOperationAsync(nameof(SendMessageAsync), conversationId, async () =>
         {
+            ArgumentException.ThrowIfNullOrWhiteSpace(content);
             var conversation = await LoadConversationAsync(conversationId, cancellationToken);
             conversation.AddMessage(MessageRole.Customer, content.Trim());
-            // Commit the messagebefore requesting the reply. The repository disposes its
+            // Commit the message before requesting the reply. The repository disposes its
             // context here, so the network call holds no database context open and an agent 
             // failure or cancellation cannot undo this message.
             await conversationRepository.SaveAsync(conversation, currentUser.UserId, cancellationToken);
@@ -148,26 +113,55 @@ public class ChatService : IChatService
             // Return success only after the assistant reply is durable as well.
             await conversationRepository.SaveAsync(conversation, currentUser.UserId, cancellationToken);
             return reply;
-        }
-        finally
-        {
-            operationLock.Release();
-        }
-    }
+        }, cancellationToken);
 
     /// <inheritdoc />
-    public async Task CloseConversationAsync(string conversationId, CancellationToken cancellationToken = default)
-    {
-        await operationLock.WaitAsync(cancellationToken);
-        try
+    public Task CloseConversationAsync(string conversationId, CancellationToken cancellationToken = default) =>
+        RunOperationAsync(nameof(CloseConversationAsync), conversationId, async () =>
         {
             var conversation = await LoadConversationAsync(conversationId, cancellationToken);
             conversation.Close();
             await conversationRepository.SaveAsync(conversation, currentUser.UserId, cancellationToken);
+            return true;
+        }, cancellationToken);
+
+    // Log once at the service boundary so storage, domain, and agent failures
+    // have the same context. The UI handles the error without logging it again.
+    private async Task<T> RunOperationAsync<T>(
+        string operationName, string? conversationId, Func<Task<T>> operation, CancellationToken cancellationToken)
+    {
+        using var scope = logger.BeginScope(new Dictionary<string, object?>
+        {
+            ["OperationId"] = Guid.NewGuid(),
+            ["Operation"] = operationName,
+            // Only record validated IDs, never arbitrary input supplied as an ID.
+            ["ConversationId"] = Guid.TryParse(conversationId, out var id) ? id : null,
+            ["ChatAgent"] = chatAgent.GetType().Name
+        });
+
+        var lockAcquired = false;
+        try
+        {
+            await operationLock.WaitAsync(cancellationToken);
+            lockAcquired = true;
+            return await operation();
+        }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+            // Closing a page or cancelling a request is an expected outcome.
+            throw;
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, "Chat operation {Operation} failed", operationName);
+            throw;
         }
         finally
         {
-            operationLock.Release();
+            if (lockAcquired)
+            {
+                operationLock.Release();
+            }
         }
     }
 

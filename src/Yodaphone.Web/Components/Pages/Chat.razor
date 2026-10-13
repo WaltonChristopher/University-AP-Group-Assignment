@@ -7,7 +7,6 @@
 @using DomainMessage = Yodaphone.Web.Domain.ChatMessage
 @implements IDisposable
 @inject IChatService ChatService
-@inject ILogger<Chat> Logger
 
 <PageTitle>YodaPhone AI — Chat</PageTitle>
 
@@ -84,9 +83,9 @@
         {
             return;
         }
-        catch (Exception exception)
+        catch (Exception)
         {
-            Logger.LogWarning(exception, "Could not restore the active conversation");
+            // ChatService records the failure with its operation context.
             _errorMessage = "Your previous conversation could not be restored.";
         }
 
@@ -174,7 +173,6 @@
         }
         catch (Exception exception)
         {
-            Logger.LogWarning(exception, "Chat operation failed");
             _errorMessage = exception is ChatAgentException ? exception.Message : errorMessage;
         }
         finally
@@ -195,9 +193,8 @@
                 catch (OperationCanceledException) when (_lifetime.IsCancellationRequested)
                 {
                 }
-                catch (Exception exception)
+                catch (Exception)
                 {
-                    Logger.LogWarning(exception, "Could not refresh the conversation");
                     _errorMessage ??= "The conversation could not be refreshed. Please try again.";
                 }
 
@@ -210,9 +207,8 @@
                 catch (OperationCanceledException) when (_lifetime.IsCancellationRequested)
                 {
                 }
-                catch (Exception exception)
+                catch (Exception)
                 {
-                    Logger.LogWarning(exception, "Could not refresh the conversation list");
                     _errorMessage ??= "Your conversations could not be refreshed. Please try again.";
                 }
 

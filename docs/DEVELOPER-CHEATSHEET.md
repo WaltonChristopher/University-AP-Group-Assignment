@@ -484,6 +484,19 @@ logger.LogError(exception, "Chat request failed");
 
 Use structured placeholders as shown above. Do not build log messages by concatenating sensitive values.
 
+Logs appear in the server console and in `src/Yodaphone.Web/Logs/app-YYYYMMDD.log`
+when running the web project normally. Files roll daily or at 10 MiB, and the
+newest 14 files are retained. Configure levels with `Serilog:MinimumLevel` in
+`appsettings.json` or the development settings file.
+
+`ChatService` logs failures from conversation operations, the database, and AI
+agents with their operation and conversation IDs, then rethrows for the UI to
+display a safe error. Avoid logging the same exception again in the UI or agent.
+Caller-requested cancellation is expected and is not logged as an error.
+Do not add chat content, transcripts, credentials, or request bodies to logs.
+Keep diagnostic files private: dependency exception messages may contain
+sensitive details. See [the logging setup](README.md#error-logging) for details.
+
 ## Testing basics
 
 The project brief requires unit, integration, and user acceptance testing.
