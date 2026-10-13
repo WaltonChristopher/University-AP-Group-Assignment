@@ -95,10 +95,15 @@ public sealed class ChatAgentBaseTests
     }
 
     [Fact]
-    public async Task GetReplyAsync_RejectsUnsafeCoreResponse()
+    public async Task GetReplyAsync_ReplacesUnsafeCoreResponseWithExplanation()
     {
         var agent = new StubResponseAgent(new AgentChatResponse { Content = "Please tell me your password" });
-        await Assert.ThrowsAsync<InvalidOperationException>(() => agent.GetReplyAsync(CreateHistory(), CancellationToken.None));
+
+        var response = await agent.GetReplyAsync(CreateHistory(), CancellationToken.None);
+
+        Assert.Equal(
+            "We couldn't provide that response because it did not meet our chat safety rules. " +
+            "Please rephrase your question or ask something else.", response.Content);
     }
 
     private sealed class StubResponseAgent(AgentChatResponse? response) : ChatAgentBase

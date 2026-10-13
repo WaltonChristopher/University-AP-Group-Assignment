@@ -242,8 +242,13 @@ Do not show exception details, stack traces, credentials, or customer data to us
 failures into this exception and retains the original failure in `InnerException` for
 server-side diagnostics. Never render `ToString()` or `InnerException`, and keep diagnostic
 logs access-controlled. Present the safe message as a UI error, not as an assistant reply.
-The example above is guidance for the future chat caller; a chat UI is not yet wired up.
-Invalid input and empty replies still use the validation exceptions documented on `IChatAgent`.
+With `Chat:Agent` set to `copilot`, the application registers `CopilotFallbackChatAgent`.
+It handles provider failures, missing or empty replies, and request timeouts by switching the scoped
+chat session to `OfflineChatAgent`. The resulting unavailability message is saved as an
+assistant reply. Caller cancellation and invalid requests do not trigger the switch.
+`ChatAgentBase` replaces sanitisation-blocked replies with a canned explanation before they
+reach the fallback agent, so they are saved safely and the session stays in Copilot mode.
+Direct calls to `GitHubCopilotAgent` still use the exceptions documented on `IChatAgent`.
 
 ## Razor and Blazor essentials
 

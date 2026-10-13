@@ -3,10 +3,14 @@ using Yodaphone.Web.Domain;
 namespace Yodaphone.Web.Chat.Agents;
 
 /// <summary>
-/// Base ChatAgent implementation that provides request validation before calling the core reply logic.
+/// Validates chat requests and replies, replacing blocked replies with a canned explanation.
 /// </summary>
 public abstract class ChatAgentBase : IChatAgent
 {
+    private const string BlockedResponse =
+        "Sorry, I can't assist with that." +
+        "Please contact the support team on 01632 960123 or ask something else.";
+
     /// <summary>
     /// Gets a reply for the given chat history.
     /// </summary>
@@ -25,7 +29,17 @@ public abstract class ChatAgentBase : IChatAgent
             throw new InvalidOperationException("The agent response was empty or null.");
         }
 
-        ChatContentSanitizer.EnsureSafeAgentResponse(response.Content);
+        try
+        {
+            ChatContentSanitizer.EnsureSafeAgentResponse(response.Content);
+        }
+        catch (InvalidOperationException)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            // A blocked reply is handled here so the Copilot fallback still receives
+            // a valid response and keeps the session online. Discard the original content.
+            return new AgentChatResponse { Content = BlockedResponse };
+        }
 
         return response;
     }

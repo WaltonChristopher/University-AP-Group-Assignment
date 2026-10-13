@@ -1,7 +1,7 @@
 namespace Yodaphone.Web.Chat.Agents.Copilot;
 
 /// <summary>
-/// Server-side credentials used by the GitHub Copilot runtime.
+/// Server-side credentials and request settings used by the GitHub Copilot runtime.
 /// </summary>
 /// <remarks>
 /// Do not populate this value from a browser request. Configure it with an environment
@@ -15,4 +15,9 @@ public sealed class CopilotOptions
     /// A GitHub token for an account that is entitled to use GitHub Copilot.
     /// </summary>
     public string? GitHubToken { get; init; }
+
+    /// <summary>
+    /// Maximum time for a complete Copilot request before switching to offline replies.
+    /// </summary>
+    public int ResponseTimeoutSeconds { get; init; } = 30;
 }
