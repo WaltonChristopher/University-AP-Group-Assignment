@@ -174,6 +174,24 @@ dotnet user-secrets set "Chat:Copilot:GitHubToken" "YOUR_GITHUB_TOKEN" --project
 
 For a deployed app, set the equivalent environment variable in the server's secret store: `Chat__Copilot__GitHubToken`. The SDK gives this explicit token precedence over any local GitHub CLI/Copilot login. If no token is configured, local development can fall back to an existing logged-in GitHub CLI/Copilot runtime identity. *This fallback is not appropriate for a shared or production server.*
 
+### Test coverage
+
+In VS Code, select **Terminal → Run Task → Test: Coverage**. Alternatively, run this from the repository root in the dev container or a Bash terminal:
+
+```bash
+bash scripts/coverage.sh
+```
+
+The script restores the pinned local tools, runs both xUnit test projects with Coverlet, and combines their results using ReportGenerator. Each run uses a fresh results directory so previous results cannot inflate coverage. Generated files live under the git-ignored `coverage/` directory.
+
+To view the results:
+
+1. Open the Command Palette (`Ctrl+Shift+P`, or `Cmd+Shift+P` on macOS) and run **Coverage Gutters: Watch**. Open a C# source file under `src/Yodaphone.Web` to see green (covered), red (uncovered), and yellow (partially covered) marks.
+2. Run **Coverage Gutters: Preview Coverage Report** for the combined HTML report. You can also open `coverage/report/index.html` in a browser.
+3. Re-run **Test: Coverage** after changing code or tests to refresh the results.
+
+The terminal prints line and branch coverage totals. Coverage measures the application assembly, excludes test assemblies and compiler-generated files under `obj`, and retains application startup and database migrations. Inspect the HTML report's file details to understand the overall percentage.
+
 ## The Assignment Task
 
 ### Task
