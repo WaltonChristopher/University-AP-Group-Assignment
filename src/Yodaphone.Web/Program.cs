@@ -28,8 +28,14 @@ public partial class Program
                 builder.Services.AddScoped<IChatAgent, OfflineChatAgent>();
                 break;
             case "copilot":
+                builder.Services.AddOptions<CopilotOptions>()
+                    .Validate(options => options.ResponseTimeoutSeconds is >= 1 and <= 3600,
+                        "Chat:Copilot:ResponseTimeoutSeconds must be between 1 and 3600.")
+                    .ValidateOnStart();
                 builder.Services.AddScoped<ICopilotClientFactory, CopilotClientFactory>();
-                builder.Services.AddScoped<IChatAgent, GitHubCopilotAgent>();
+                builder.Services.AddScoped<GitHubCopilotAgent>();
+                builder.Services.AddScoped<OfflineChatAgent>();
+                builder.Services.AddScoped<IChatAgent, CopilotFallbackChatAgent>();
                 break;
             default:
                 throw new InvalidOperationException($"Unknown chat agent: {agentName}");

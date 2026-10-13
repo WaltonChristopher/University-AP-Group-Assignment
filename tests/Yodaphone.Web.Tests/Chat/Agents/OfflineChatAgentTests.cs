@@ -9,7 +9,7 @@ public sealed class OfflineChatAgentTests
     private readonly IChatAgent agent = new OfflineChatAgent();
 
     [Fact]
-    public async Task GetReplyAsync_ReturnsNonEmptyOfflineResponse()
+    public async Task GetReplyAsync_ExplainsServiceIsUnavailableAndProvidesDirectSupportNumber()
     {
         var conversation = CreateConversationWithCustomerMessage();
 
@@ -17,7 +17,9 @@ public sealed class OfflineChatAgentTests
             conversation.Messages.ToList(),
             CancellationToken.None);
 
-        Assert.False(string.IsNullOrWhiteSpace(response.Content));
+        Assert.Contains("chat service is currently unavailable", response.Content);
+        Assert.Contains("cannot complete your request", response.Content);
+        Assert.Contains("call YodaPhone on 01632 960123 for direct support", response.Content);
     }
 
     [Fact]

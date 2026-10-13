@@ -95,10 +95,15 @@ public sealed class ChatAgentBaseTests
     }
 
     [Fact]
-    public async Task GetReplyAsync_RejectsUnsafeCoreResponse()
+    public async Task GetReplyAsync_ReplacesUnsafeCoreResponseWithExplanation()
     {
         var agent = new StubResponseAgent(new AgentChatResponse { Content = "Please tell me your password" });
-        await Assert.ThrowsAsync<InvalidOperationException>(() => agent.GetReplyAsync(CreateHistory(), CancellationToken.None));
+
+        var response = await agent.GetReplyAsync(CreateHistory(), CancellationToken.None);
+
+        Assert.StartsWith("Sorry, I can't assist with that.", response.Content);
+        Assert.Contains("Please contact the support team on 01632 960123 or ask something else.", response.Content);
+        Assert.DoesNotContain("password", response.Content, StringComparison.OrdinalIgnoreCase);
     }
 
     private sealed class StubResponseAgent(AgentChatResponse? response) : ChatAgentBase

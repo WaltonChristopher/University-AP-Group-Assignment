@@ -24,6 +24,8 @@ internal sealed class FakeCopilotClientFactory : ICopilotClientFactory
     public Exception? Failure { get; set; }
     public string? CancellationStage { get; set; }
     public Action? CancelRequest { get; set; }
+    public Func<string, CancellationToken, Task>? OnStageAsync { get; set; }
+    public Action? OnClientDisposed { get; set; }
 
     public ICopilotClient Create(CopilotClientOptions options)
     {
@@ -51,6 +53,10 @@ internal sealed class FakeCopilotClientFactory : ICopilotClientFactory
         await Task.Yield();
         Calls.Add(stage);
         ReceivedTokens.Add(cancellationToken);
+        if (OnStageAsync is not null)
+        {
+            await OnStageAsync(stage, cancellationToken);
+        }
         if (stage == CancellationStage)
         {
             // The test supplies CancellationTokenSource.Cancel to cancel the caller's token
@@ -91,6 +97,7 @@ internal sealed class FakeCopilotClientFactory : ICopilotClientFactory
         public ValueTask DisposeAsync()
         {
             owner.Calls.Add("dispose-client");
+            owner.OnClientDisposed?.Invoke();
             owner.ThrowIfConfigured("dispose-client");
             return ValueTask.CompletedTask;
         }

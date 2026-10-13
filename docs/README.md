@@ -35,12 +35,23 @@ The Copilot SDK version as specified in `Yodaphone.Web.csproj` is `1.0.13-previe
 {
   "Chat": {
     "Agent": "offline",
-    "DevelopmentUserId": 42
+    "DevelopmentUserId": 42,
+    "Copilot": {
+      "ResponseTimeoutSeconds": 30
+    }
   }
 }
 ```
 
 `Agent` represents which AI agent to use for chat replies. It may be `"offline"` or `"copilot"`. For the copilot agent, refer to the [Copilot setup](#github-copilot-authentication) below.
+
+When `Agent` is `"copilot"`, a missing, empty, or failed reply automatically switches the current chat session to offline mode and saves an offline assistant reply. Subsequent messages in that session use offline replies without retrying Copilot. A new browser session starts with the configured agent again; the automatic switch does not change `appsettings.json`.
+
+Replies blocked by the response sanitisation rules are replaced with a canned explanation that the response could not be provided and an invitation to rephrase the question. The session stays in Copilot mode, so the next message still goes to Copilot. Only the explanation is saved and included in future chat history; the blocked content is discarded.
+
+`Chat:Copilot:ResponseTimeoutSeconds` limits the entire Copilot request, including startup and cleanup (default `30`, allowed range `1`–`3600`). Requests that exceed this limit switch offline, even if the SDK is still finishing in the background. Caller cancellation cancels the request without switching modes.
+
+Offline replies explain that the chat service is currently unavailable and direct users to `01632 960123` for support. This is a fictional UK landline in [Ofcom's reserved drama range](https://www.ofcom.org.uk/phones-and-broadband/phone-numbers/numbers-for-drama), used for this demonstration.
 
 `DevelopmentUserId` is a placeholder value for the user's ID and should be replaced once we have user authentication working. It can be set to any positive integer.
 

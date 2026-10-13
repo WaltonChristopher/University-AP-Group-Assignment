@@ -5,20 +5,12 @@ namespace Yodaphone.Web.Chat.Agents;
 /// <summary>
 /// An implementation of ChatAgentBase that provides offline responses.
 /// </summary>
-/// <TODO>
-/// This class is a placeholder for an offline chat agent. It should be extended to provide better offline responses.
-/// </TODO>
 public sealed class OfflineChatAgent : ChatAgentBase
 {
-
-    private static readonly string[] CannedResponses =
-    {
-        "Thank you for your inquiry. A YodaPhone specialist will be with you shortly.",
-        "I understand. Let me look into your account and get back to you.",
-        "That is a great question. Here is what I found for you.",
-        "Your request has been logged. Reference number attached to this conversation.",
-        "I can help with that. Could you tell me a little more about the issue?"
-    };
+    // Fictional UK landline from Ofcom's range reserved for drama.
+    private const string UnavailableResponse =
+        "The chat service is currently unavailable, so we cannot complete your request here. " +
+        "Please call YodaPhone on 01632 960123 for direct support.";
 
     protected override Task<AgentChatResponse> GetReplyCoreAsync(
         IReadOnlyList<ChatMessage> history,
@@ -27,7 +19,7 @@ public sealed class OfflineChatAgent : ChatAgentBase
     {
         var response = new AgentChatResponse
         {
-            Content = CannedResponses[Random.Shared.Next(CannedResponses.Length)]
+            Content = UnavailableResponse
         };
 
         return Task.FromResult(response);
