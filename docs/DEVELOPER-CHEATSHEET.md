@@ -530,7 +530,7 @@ agent; they do not require Copilot credentials or modify the development databas
 Install the Playwright Chromium browser once after restoring/building the solution:
 
 ```bash
-pwsh tests/Yodaphone.Web.Tests/bin/Debug/net10.0/playwright.ps1 install chromium
+pwsh tests/Yodaphone.Web.Tests/bin/Debug/net10.0/playwright.ps1 install chromium --with-deps
 ```
 
 Then run the browser journey together with the other tests using
