@@ -7,3 +7,15 @@ window.chatInterop = {
         }
     }
 };
+document.addEventListener("keydown", event => {
+    const target = event.target;
+
+    if (
+        target instanceof HTMLTextAreaElement &&
+        target.classList.contains("yp-input-bar__field") &&
+        event.key === "Enter" &&
+        !event.shiftKey
+    ) {
+        event.preventDefault();
+    }
+});
