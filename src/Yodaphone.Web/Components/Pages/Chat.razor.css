@@ -28,19 +28,33 @@
     gap: 0.65rem;
 }
 
+.yp-header__brand {
+    min-width: 0;
+}
+
+.yp-header__logo {
+    display: flex;
+    align-items: center;
+    min-width: 0;
+    padding: 0.3rem 0.55rem;
+    background: var(--yp-mist-100);
+    border-radius: var(--yp-radius-sm);
+}
+
+.yp-logo {
+    display: block;
+    width: 220px;
+    max-width: 100%;
+    height: auto;
+}
+
 .yp-brand-name {
     font-family: var(--yp-font-display);
-    font-size: 1.1rem;
+    font-size: 0.85rem;
     font-weight: 600;
-    white-space: nowrap;
-}
-
-.yp-brand-name em {
     color: var(--yp-signal-500);
-    font-style: normal;
 }
 
-.yp-logo,
 .yp-avatar {
     display: inline-flex;
     align-items: center;
@@ -48,15 +62,10 @@
     flex: 0 0 auto;
     width: 36px;
     height: 36px;
-    background: var(--yp-teal-600);
-    border-radius: var(--yp-radius-sm);
-    font-family: var(--yp-font-display);
-    font-weight: 600;
-}
-
-.yp-avatar {
     background: var(--yp-signal-600);
     border-radius: 50%;
+    font-family: var(--yp-font-display);
+    font-weight: 600;
 }
 
 .yp-header__spacer {
@@ -119,8 +128,8 @@
         flex: 1;
     }
 
-    .yp-brand-name {
-        font-size: 0.95rem;
+    .yp-header__logo {
+        padding: 0.45rem;
     }
 
     .yp-header__spacer {
@@ -128,7 +137,7 @@
     }
 
     .yp-logo {
-        display: none;
+        width: 165px;
     }
 
     .yp-main {
