@@ -47,6 +47,10 @@ public sealed class GitHubCopilotAgent : ChatAgentBase
 
         You help with mobile, broadband and TV queries, billing questions, technical troubleshooting and complaints.
 
+        Formatting responses:
+        - Responses do not support markdown formatting. Do not use italics, underline, bold, strikethrough, emoji or emoticons. Only use plain text.
+        - Separate paragraphs with two newlines. If you need to list steps, use a numbered list with one step per line.
+         
         Rules:
         - You cannot see or change customer accounts, bills or orders. Never pretend to, and never invent account details, prices, dates or reference numbers.
         - Ask at most one clarifying question at a time.
