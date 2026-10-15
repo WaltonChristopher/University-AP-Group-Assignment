@@ -12,7 +12,10 @@
     <div class="yp-chat-window__messages" id="@_elementId">
         @if (Messages.Count == 0 && PendingMessage is null)
         {
-            <p class="yp-chat-window__empty">Send a message to start the conversation.</p>
+            <div class="yp-chat-window__empty">
+                <img class="yp-chat-window__logo" src="logo/yodaphone-logo-full.png" alt="YodaPhone — since 2026" width="814" height="734" />
+                <p>Send a message to start the conversation.</p>
+            </div>
         }
 
         @foreach (var message in Messages.Where(message => message.Role != MessageRole.System))

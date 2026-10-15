@@ -2,6 +2,10 @@
 @using DomainMessage = Yodaphone.Web.Domain.ChatMessage
 
 <div class="yp-message-row @(IsFromAgent ? "yp-message-row--bot" : "yp-message-row--user")">
+    @if (IsFromAgent)
+    {
+        <img class="yp-message-avatar" src="logo/yodaphone-icon.png" alt="" width="246" height="271" aria-hidden="true" />
+    }
     <div class="yp-bubble @(IsFromAgent ? "yp-bubble--bot" : "yp-bubble--user")">
         <span class="yp-bubble__sender">@(IsFromAgent ? "YodaPhone AI" : "You")</span>
         <p class="yp-bubble__content">@(Message?.Content ?? PendingContent)</p>

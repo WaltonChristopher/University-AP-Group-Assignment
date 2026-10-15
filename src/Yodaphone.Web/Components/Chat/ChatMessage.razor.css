@@ -1,6 +1,15 @@
 .yp-message-row {
     display: flex;
+    align-items: flex-end;
+    gap: 0.5rem;
     width: 100%;
+}
+
+.yp-message-avatar {
+    display: block;
+    flex: 0 0 auto;
+    width: 32px;
+    height: auto;
 }
 
 .yp-message-row--bot {
