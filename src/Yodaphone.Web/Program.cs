@@ -32,7 +32,9 @@ public partial class Program
                     .Validate(options => options.ResponseTimeoutSeconds is >= 1 and <= 3600,
                         "Chat:Copilot:ResponseTimeoutSeconds must be between 1 and 3600.")
                     .ValidateOnStart();
-                builder.Services.AddScoped<ICopilotClientFactory, CopilotClientFactory>();
+                builder.Services.AddSingleton<TimeProvider>(TimeProvider.System);
+                builder.Services.AddSingleton<ICopilotClientFactory, CopilotClientFactory>();
+                builder.Services.AddSingleton<CopilotConnectionHealthCheck>();
                 builder.Services.AddScoped<GitHubCopilotAgent>();
                 builder.Services.AddScoped<OfflineChatAgent>();
                 builder.Services.AddScoped<IChatAgent, CopilotFallbackChatAgent>();

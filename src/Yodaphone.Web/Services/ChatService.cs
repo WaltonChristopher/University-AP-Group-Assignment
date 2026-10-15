@@ -16,6 +16,15 @@ public class ChatService : IChatService
     private readonly IConversationRepository conversationRepository;
     private readonly ICurrentUser currentUser;
 
+    /// <inheritdoc />
+    public TimeSpan? ConnectionRetryInterval => (chatAgent as IRecoverableChatAgent)?.ConnectionRetryInterval;
+
+    /// <inheritdoc />
+    public Task<bool> TryRestoreConnectionAsync(CancellationToken cancellationToken = default) =>
+        chatAgent is IRecoverableChatAgent recoverableAgent
+            ? recoverableAgent.TryRestoreConnectionAsync(cancellationToken)
+            : Task.FromResult(false);
+
     // Serialize operations within this service instance so a close or another
     // send cannot change history while its agent response is being generated.
     // This does not lock other Blazor circuits or other service instances.

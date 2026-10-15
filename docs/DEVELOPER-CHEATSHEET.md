@@ -246,6 +246,13 @@ With `Chat:Agent` set to `copilot`, the application registers `CopilotFallbackCh
 It handles provider failures, missing or empty replies, and request timeouts by switching the scoped
 chat session to `OfflineChatAgent`. The resulting unavailability message is saved as an
 assistant reply. Caller cancellation and invalid requests do not trigger the switch.
+The interactive chat page checks for recovery every `Chat:Copilot:ResponseTimeoutSeconds` seconds.
+`CopilotConnectionHealthCheck` shares and caches a bounded `ListModelsAsync` metadata check across
+sessions on the server. It never creates a chat session or sends a prompt, so recovery does not
+generate model responses. A successful check restores online mode and the page saves a single
+connection-restored assistant message in the selected active conversation. Offline replies remain
+available during checks, and disposing the page cancels its monitoring loop. Metadata availability
+does not guarantee inference availability; another failed reply switches the session offline again.
 `ChatAgentBase` replaces sanitisation-blocked replies with a canned explanation before they
 reach the fallback agent, so they are saved safely and the session stays in Copilot mode.
 Direct calls to `GitHubCopilotAgent` still use the exceptions documented on `IChatAgent`.

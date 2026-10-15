@@ -20,6 +20,7 @@ internal sealed class FakeCopilotClientFactory : ICopilotClientFactory
     // Stage names match the recorded calls: "start", "create-session", or "send".
     // Failures can also be injected at "create-client", "dispose-session", or "dispose-client".
     public AssistantMessageEvent? Response { get; set; } = CreateResponse("Copilot reply");
+    public IList<ModelInfo> Models { get; set; } = [new ModelInfo { Id = "test-model", Name = "Test model" }];
     public string? FailureStage { get; set; }
     public Exception? Failure { get; set; }
     public string? CancellationStage { get; set; }
@@ -83,6 +84,12 @@ internal sealed class FakeCopilotClientFactory : ICopilotClientFactory
         public Task StartAsync(CancellationToken cancellationToken)
         {
             return owner.CompleteStageAsync("start", cancellationToken);
+        }
+
+        public async Task<IList<ModelInfo>> ListModelsAsync(CancellationToken cancellationToken)
+        {
+            await owner.CompleteStageAsync("list-models", cancellationToken);
+            return owner.Models;
         }
 
         public async Task<ICopilotSession> CreateSessionAsync(

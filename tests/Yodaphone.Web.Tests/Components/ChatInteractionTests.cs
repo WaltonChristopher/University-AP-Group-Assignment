@@ -2,10 +2,15 @@ using Bunit;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging.Abstractions;
+using Microsoft.Extensions.Options;
 using Xunit;
 using Yodaphone.Web.Chat.Agents;
+using Yodaphone.Web.Chat.Agents.Copilot;
 using Yodaphone.Web.Domain;
 using Yodaphone.Web.Services;
+using Yodaphone.Web.Tests.Chat.Agents.TestDoubles;
+using Yodaphone.Web.Tests.Services;
 using ChatInput = Yodaphone.Web.Components.Chat.ChatInput;
 using ChatWindow = Yodaphone.Web.Components.Chat.ChatWindow;
 using Sidebar = Yodaphone.Web.Components.Chat.Sidebar;
@@ -305,14 +310,124 @@ public sealed class ChatInteractionTests : BunitContext
         Assert.Single(service.SentTexts);
     }
 
+    [Fact]
+    public async Task Page_RecoveryAutomaticallyRestoresOnlineRepliesAndPersistsOneVisibleNotice()
+    {
+        await using var database = await SqliteTestDatabase.CreateAsync();
+        var factory = new FakeCopilotClientFactory { Response = null };
+        var options = Options.Create(new CopilotOptions { ResponseTimeoutSeconds = 1 });
+        var check = new CopilotConnectionHealthCheck(factory, options,
+            NullLogger<CopilotConnectionHealthCheck>.Instance, TimeProvider.System);
+        var agent = new CopilotFallbackChatAgent(new GitHubCopilotAgent(factory), new OfflineChatAgent(), options,
+            NullLogger<CopilotFallbackChatAgent>.Instance, check);
+        var service = new ChatService(agent, new SqliteConversationRepository(database), new TestCurrentUser());
+        Services.AddSingleton<IChatService>(service);
+        var cut = Render<ChatPage>();
+        cut.WaitForAssertion(() => Assert.Contains("How can I help with your account today?", cut.Markup));
+        cut.Find("textarea").Input("Help with my bill");
+        await cut.Find(".yp-input-bar__send").ClickAsync(new MouseEventArgs());
+        Assert.Contains("chat service is currently unavailable", cut.Markup);
+        factory.Response = FakeCopilotClientFactory.CreateResponse("Online answer");
+
+        cut.WaitForAssertion(() => Assert.Contains("Connection to the Yodaphone chatbot has been restored.", cut.Markup),
+            TimeSpan.FromSeconds(10));
+
+        cut.Find("textarea").Input("Can you help now?");
+        await cut.Find(".yp-input-bar__send").ClickAsync(new MouseEventArgs());
+        Assert.Contains("Online answer", cut.Markup);
+        var restored = await service.GetActiveConversationAsync();
+        Assert.NotNull(restored);
+        Assert.Equal(6, restored.Messages.Count);
+        Assert.Equal(new[] { "Help with my bill", "Can you help now?" },
+            restored.Messages.Where(message => message.Role == MessageRole.Customer).Select(message => message.Content));
+        var notice = Assert.Single(restored.Messages, message => message.Content.StartsWith("Connection to the Yodaphone chatbot"));
+        Assert.Equal(MessageRole.Assistant, notice.Role);
+        Assert.DoesNotContain("test-model", cut.Markup);
+        Assert.Single(factory.Calls, call => call == "list-models");
+        Assert.Equal(2, factory.Calls.Count(call => call == "send"));
+        await cut.InvokeAsync(() => cut.Instance.Dispose());
+        database.AssertAllContextsDisposed();
+    }
+
+    [Fact]
+    public async Task Page_RecoveryNotifiesTheConversationSelectedWhenTheCheckCompletes()
+    {
+        var started = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        var gate = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
+        var subsequentCheck = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        var service = new TestChatService { ConnectionRetryInterval = TimeSpan.FromMilliseconds(20) };
+        var attempts = 0;
+        service.OnRestoreConnection = async token =>
+        {
+            if (++attempts == 1)
+            {
+                started.TrySetResult();
+                return await gate.Task.WaitAsync(token);
+            }
+            subsequentCheck.TrySetResult();
+            return false;
+        };
+        var cut = RenderPage(service);
+        await started.Task.WaitAsync(TimeSpan.FromSeconds(10));
+        cut.Find(".yp-chat-window__toolbar button").Click();
+        gate.SetResult(true);
+
+        cut.WaitForAssertion(() => Assert.Contains("Connection to the Yodaphone chatbot has been restored.", cut.Markup));
+        await subsequentCheck.Task.WaitAsync(TimeSpan.FromSeconds(10));
+        Assert.DoesNotContain(service.Conversations[0].Messages,
+            message => message.Content.StartsWith("Connection to the Yodaphone chatbot"));
+        Assert.Single(service.Conversations[1].Messages,
+            message => message.Content.StartsWith("Connection to the Yodaphone chatbot"));
+    }
+
+    [Fact]
+    public async Task Page_DisposalCancelsAnInFlightRecoveryCheck()
+    {
+        var started = new TaskCompletionSource<CancellationToken>(TaskCreationOptions.RunContinuationsAsynchronously);
+        var cancelled = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        var service = new TestChatService { ConnectionRetryInterval = TimeSpan.FromMilliseconds(20) };
+        service.OnRestoreConnection = async token =>
+        {
+            started.TrySetResult(token);
+            try
+            {
+                await Task.Delay(Timeout.Infinite, token);
+                return true;
+            }
+            finally
+            {
+                cancelled.TrySetResult();
+            }
+        };
+        var cut = RenderPage(service);
+        var received = await started.Task.WaitAsync(TimeSpan.FromSeconds(10));
+
+        await cut.InvokeAsync(() => cut.Instance.Dispose());
+        await cancelled.Task.WaitAsync(TimeSpan.FromSeconds(10));
+
+        Assert.True(received.IsCancellationRequested);
+        Assert.DoesNotContain(service.Conversations.Single().Messages,
+            message => message.Content.StartsWith("Connection to the Yodaphone chatbot"));
+    }
+
     private IRenderedComponent<ChatPage> RenderPage(TestChatService service)
     {
         Services.AddSingleton<IChatService>(service);
         return Render<ChatPage>();
     }
 
+    private sealed class TestCurrentUser : ICurrentUser
+    {
+        public int UserId => 42;
+    }
+
     private sealed class TestChatService : IChatService
     {
+        public TimeSpan? ConnectionRetryInterval { get; init; }
+        public Func<CancellationToken, Task<bool>>? OnRestoreConnection { get; set; }
+        public Task<bool> TryRestoreConnectionAsync(CancellationToken cancellationToken = default) =>
+            OnRestoreConnection?.Invoke(cancellationToken) ?? Task.FromResult(false);
+
         public List<Conversation> Conversations { get; } = [];
         public List<string> SentTexts { get; } = [];
         public List<string> LoadedIds { get; } = [];

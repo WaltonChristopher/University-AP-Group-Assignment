@@ -31,7 +31,7 @@ public sealed class CopilotFallbackChatAgentTests
     [InlineData("null")]
     [InlineData("empty")]
     [InlineData("whitespace")]
-    public async Task GetReplyAsync_WithUnusableReply_SwitchesOfflineAndDoesNotRetry(string replyKind)
+    public async Task GetReplyAsync_WithUnusableReply_UsesOfflineRepliesUntilRecovery(string replyKind)
     {
         factory.Response = replyKind == "missing" ? null : FakeCopilotClientFactory.CreateResponse(replyKind switch
         {
@@ -204,11 +204,90 @@ public sealed class CopilotFallbackChatAgentTests
         Assert.Equal("Recovered reply", response.Content);
     }
 
+    [Fact]
+    public async Task Recovery_OnlineSessionDoesNotCheckTheSdk()
+    {
+        Assert.False(await CreateAgent().TryRestoreConnectionAsync(CancellationToken.None));
+        Assert.Empty(factory.Calls);
+    }
+
+    [Fact]
+    public async Task Recovery_MetadataSuccessRestoresCopilotOnceAndLaterReplyFailureFallsBackAgain()
+    {
+        var agent = CreateAgent();
+        factory.Response = null;
+        AssertOffline(await agent.GetReplyAsync(CreateHistory(), CancellationToken.None));
+
+        factory.Calls.Clear();
+        Assert.True(await agent.TryRestoreConnectionAsync(CancellationToken.None));
+        Assert.False(await agent.TryRestoreConnectionAsync(CancellationToken.None));
+        Assert.Equal(new[] { "create-client", "start", "list-models", "dispose-client" }, factory.Calls);
+
+        factory.Response = FakeCopilotClientFactory.CreateResponse("Online again");
+        Assert.Equal("Online again", (await agent.GetReplyAsync(CreateHistory(), CancellationToken.None)).Content);
+
+        factory.Response = null;
+        AssertOffline(await agent.GetReplyAsync(CreateHistory(), CancellationToken.None));
+    }
+
+    [Fact]
+    public async Task Recovery_FailedMetadataCheckKeepsOfflineRepliesAvailable()
+    {
+        var agent = CreateAgent();
+        factory.Response = null;
+        AssertOffline(await agent.GetReplyAsync(CreateHistory(), CancellationToken.None));
+
+        var checkStarted = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        var gate = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        factory.OnStageAsync = (stage, token) =>
+        {
+            if (stage != "list-models") return Task.CompletedTask;
+            checkStarted.TrySetResult();
+            return gate.Task.WaitAsync(token);
+        };
+        factory.FailureStage = "list-models";
+        factory.Failure = new IOException("Service unavailable");
+        var checking = agent.TryRestoreConnectionAsync(CancellationToken.None);
+        try
+        {
+            await checkStarted.Task.WaitAsync(TimeSpan.FromSeconds(10));
+            AssertOffline(await agent.GetReplyAsync(CreateHistory(), CancellationToken.None)
+                .WaitAsync(TimeSpan.FromSeconds(1)));
+        }
+        finally
+        {
+            gate.TrySetResult();
+        }
+
+        Assert.False(await checking);
+        AssertOffline(await agent.GetReplyAsync(CreateHistory(), CancellationToken.None));
+        Assert.Single(factory.Calls, call => call == "send");
+    }
+
+    [Fact]
+    public async Task Recovery_CallerCancellationKeepsOfflineMode()
+    {
+        var agent = CreateAgent();
+        factory.Response = null;
+        AssertOffline(await agent.GetReplyAsync(CreateHistory(), CancellationToken.None));
+        using var cancellation = new CancellationTokenSource();
+        factory.CancellationStage = "list-models";
+        factory.CancelRequest = cancellation.Cancel;
+
+        await Assert.ThrowsAnyAsync<OperationCanceledException>(() => agent.TryRestoreConnectionAsync(cancellation.Token));
+
+        AssertOffline(await agent.GetReplyAsync(CreateHistory(), CancellationToken.None));
+    }
+
     private CopilotFallbackChatAgent CreateAgent(int timeoutSeconds = 30) => new(
         new GitHubCopilotAgent(factory),
         new OfflineChatAgent(),
         Options.Create(new CopilotOptions { ResponseTimeoutSeconds = timeoutSeconds }),
-        NullLogger<CopilotFallbackChatAgent>.Instance);
+        NullLogger<CopilotFallbackChatAgent>.Instance,
+        new CopilotConnectionHealthCheck(factory,
+            Options.Create(new CopilotOptions { ResponseTimeoutSeconds = timeoutSeconds }),
+            NullLogger<CopilotConnectionHealthCheck>.Instance,
+            TimeProvider.System));
 
     private static IReadOnlyList<ChatMessage> CreateHistory()
     {
