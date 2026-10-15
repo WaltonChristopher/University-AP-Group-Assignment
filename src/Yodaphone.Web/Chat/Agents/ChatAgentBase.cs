@@ -8,7 +8,7 @@ namespace Yodaphone.Web.Chat.Agents;
 public abstract class ChatAgentBase : IChatAgent
 {
     private const string BlockedResponse =
-        "Sorry, I can't assist with that." +
+        "Sorry, I can't assist with that. " +
         "Please contact the support team on 01632 960123 or ask something else.";
 
     /// <summary>
