@@ -70,6 +70,69 @@
     private bool _isBusy;
     private bool _isWaitingForReply;
     private bool _disposed;
+    private bool _connectionRestoredMessagePending;
+
+    protected override Task OnAfterRenderAsync(bool firstRender)
+    {
+        // OnAfterRenderAsync only runs for the interactive page, never during server prerendering.
+        if (firstRender && ChatService.ConnectionRetryInterval is { } interval)
+        {
+            _ = MonitorConnectionAsync(interval, _lifetime.Token);
+        }
+
+        return Task.CompletedTask;
+    }
+
+    private async Task MonitorConnectionAsync(TimeSpan interval, CancellationToken cancellationToken)
+    {
+        try
+        {
+            while (true)
+            {
+                await Task.Delay(interval, cancellationToken);
+                try
+                {
+                    if (await ChatService.TryRestoreConnectionAsync(cancellationToken))
+                    {
+                        _connectionRestoredMessagePending = true;
+                    }
+
+                    // A check does not hold the conversation lock or disable offline messaging.
+                    // Wait for any user operation before appending the notice to the selected chat.
+                    while (_isBusy && _connectionRestoredMessagePending)
+                    {
+                        await Task.Delay(TimeSpan.FromMilliseconds(100), cancellationToken);
+                    }
+
+                    if (_connectionRestoredMessagePending && CanSendMessages && !_disposed)
+                    {
+                        await RunConversationOperation(async () =>
+                        {
+                            await ChatService.AddMessageAsync(
+                                _conversation!.Id.ToString(), MessageRole.Assistant,
+                                "Connection to the Yodaphone chatbot has been restored. You can continue chatting with us.",
+                                cancellationToken);
+                            _connectionRestoredMessagePending = false;
+                        }, "The connection-restored message could not be saved. Please try again.");
+                        StateHasChanged();
+                    }
+                }
+                catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+                {
+                    throw;
+                }
+                catch (Exception exception)
+                {
+                    // A failed check must not interrupt the chat or prevent a later retry.
+                    Logger.LogWarning(exception, "Could not check the chat connection");
+                }
+            }
+        }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+            // Leaving the page stops the timer and cancels an in-flight check.
+        }
+    }
 
     protected override async Task OnInitializedAsync()
     {

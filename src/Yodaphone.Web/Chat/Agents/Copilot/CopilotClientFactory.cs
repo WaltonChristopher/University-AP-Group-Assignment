@@ -58,6 +58,15 @@ public sealed class CopilotClientFactory : ICopilotClientFactory
             return client.StartAsync(cancellationToken);
         }
 
+        /// <summary>
+        /// Lists the models available to the Copilot client. This is a non-inference operation that does not consume credits,
+        /// so can be used to check availability without sending chat messages.
+        /// </summary>
+        public Task<IList<ModelInfo>> ListModelsAsync(CancellationToken cancellationToken)
+        {
+            return client.ListModelsAsync(cancellationToken);
+        }
+
         public async Task<ICopilotSession> CreateSessionAsync(
             SessionConfig config,
             CancellationToken cancellationToken)

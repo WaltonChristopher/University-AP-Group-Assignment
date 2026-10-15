@@ -9,6 +9,16 @@ namespace Yodaphone.Web.Services;
 public interface IChatService
 {
     /// <summary>
+    /// Interval between connection checks, or null when the configured agent has no recovery mode.
+    /// </summary>
+    TimeSpan? ConnectionRetryInterval { get; }
+
+    /// <summary>
+    /// Checks provider availability without a chat request. Returns true only after restoring online mode.
+    /// </summary>
+    Task<bool> TryRestoreConnectionAsync(CancellationToken cancellationToken = default);
+
+    /// <summary>
     /// Creates and persists an empty, active conversation for the current user.
     /// </summary>
     /// <remarks>

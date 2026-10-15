@@ -17,6 +17,11 @@ public interface ICopilotClient : IAsyncDisposable
     Task StartAsync(CancellationToken cancellationToken);
 
     /// <summary>
+    /// Requests model metadata without creating a session or generating a model response.
+    /// </summary>
+    Task<IList<ModelInfo>> ListModelsAsync(CancellationToken cancellationToken);
+
+    /// <summary>
     /// Creates a session that the caller owns and disposes before disposing the client.
     /// </summary>
     Task<ICopilotSession> CreateSessionAsync(SessionConfig config, CancellationToken cancellationToken);

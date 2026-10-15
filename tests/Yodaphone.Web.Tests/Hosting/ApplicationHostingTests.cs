@@ -169,7 +169,7 @@ public sealed class ApplicationHostingTests
             if (copilotFactory is not null)
             {
                 builder.ConfigureServices(services => services.Replace(
-                    ServiceDescriptor.Scoped<ICopilotClientFactory>(_ => copilotFactory)));
+                    ServiceDescriptor.Singleton<ICopilotClientFactory>(_ => copilotFactory)));
             }
         }
 
