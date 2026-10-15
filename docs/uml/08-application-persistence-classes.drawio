@@ -1,0 +1,933 @@
+<mxfile host="app.diagrams.net" agent="Yodaphone UML documentation" compressed="false">
+  <diagram id="08-application-persistence-classes" name="8. Combined application and persistence class diagram">
+    <mxGraphModel dx="4345" dy="2565" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="4240" pageHeight="2440" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="title" parent="1" style="text;html=0;whiteSpace=wrap;overflow=hidden;align=left;verticalAlign=middle;fontFamily=Helvetica;fontSize=27;fontColor=#334155;fontStyle=1;spacing=0;" value="Application class diagram" vertex="1">
+          <mxGeometry height="40" width="4160" x="40" y="60" as="geometry" />
+        </mxCell>
+        <mxCell id="domain-package" parent="1" style="shape=swimlane;html=0;startSize=38;horizontal=1;collapsible=0;container=0;rounded=0;fillColor=#f8fafc;swimlaneFillColor=#ffffff;strokeColor=#cbd5e1;fontColor=#334155;fontSize=17;fontStyle=1;align=left;spacingLeft=14;" value="Yodaphone.Web.Domain" vertex="1">
+          <mxGeometry height="970" width="920" x="40" y="150" as="geometry" />
+        </mxCell>
+        <mxCell id="multiplicity-3" parent="domain-package" style="text;html=0;whiteSpace=wrap;overflow=hidden;align=left;verticalAlign=middle;fontFamily=Helvetica;fontSize=12;fontColor=#334155;fontStyle=1;spacing=0;" value="0..*" vertex="1">
+          <mxGeometry height="20" width="34" x="490" y="148" as="geometry" />
+        </mxCell>
+        <mxCell id="multiplicity-2" parent="domain-package" style="text;html=0;whiteSpace=wrap;overflow=hidden;align=left;verticalAlign=middle;fontFamily=Helvetica;fontSize=12;fontColor=#334155;fontStyle=1;spacing=0;" value="1" vertex="1">
+          <mxGeometry height="20" width="34" x="456" y="165" as="geometry" />
+        </mxCell>
+        <mxCell id="service-package" parent="1" style="shape=swimlane;html=0;startSize=38;horizontal=1;collapsible=0;container=0;rounded=0;fillColor=#f8fafc;swimlaneFillColor=#ffffff;strokeColor=#cbd5e1;fontColor=#334155;fontSize=17;fontStyle=1;align=left;spacingLeft=14;" value="Yodaphone.Web.Services" vertex="1">
+          <mxGeometry height="1990" width="750" x="1000" y="150" as="geometry" />
+        </mxCell>
+        <mxCell id="agent-package" parent="1" style="shape=swimlane;html=0;startSize=38;horizontal=1;collapsible=0;container=0;rounded=0;fillColor=#f8fafc;swimlaneFillColor=#ffffff;strokeColor=#cbd5e1;fontColor=#334155;fontSize=17;fontStyle=1;align=left;spacingLeft=14;" value="Yodaphone.Web.Chat / Agents / Agents.Copilot" vertex="1">
+          <mxGeometry height="1690" width="1090" x="1790" y="150" as="geometry" />
+        </mxCell>
+        <mxCell id="factory" parent="agent-package" style="rounded=0;html=0;fillColor=#fff2d5;strokeColor=#475569;strokeWidth=1.4;container=1;collapsible=0;" value="" vertex="1">
+          <mxGeometry height="122" width="340" x="50" y="1320" as="geometry" />
+        </mxCell>
+        <mxCell id="factory-title" parent="factory" style="text;html=0;whiteSpace=wrap;overflow=hidden;align=center;verticalAlign=middle;fontFamily=Helvetica;fontSize=14;fontColor=#0f172a;fontStyle=1;spacing=0;" value="CopilotClientFactory" vertex="1">
+          <mxGeometry height="30" width="324" x="8" y="6" as="geometry" />
+        </mxCell>
+        <mxCell id="factory-divider-0" parent="factory" style="line;strokeColor=#64748b;strokeWidth=1;" value="" vertex="1">
+          <mxGeometry width="340" y="42" as="geometry" />
+        </mxCell>
+        <mxCell id="factory-body-0" parent="factory" style="text;html=0;whiteSpace=wrap;overflow=hidden;align=left;verticalAlign=middle;fontFamily=Helvetica;fontSize=12;fontColor=#1e293b;fontStyle=0;spacing=0;" value="+ Create(options): ICopilotClient" vertex="1">
+          <mxGeometry height="20" width="320" x="10" y="48" as="geometry" />
+        </mxCell>
+        <mxCell id="factory-divider-1" parent="factory" style="line;strokeColor=#64748b;strokeWidth=1;" value="" vertex="1">
+          <mxGeometry width="340" y="74" as="geometry" />
+        </mxCell>
+        <mxCell id="factory-body-1" parent="factory" style="text;html=0;whiteSpace=wrap;overflow=hidden;align=left;verticalAlign=middle;fontFamily=Helvetica;fontSize=12;fontColor=#475569;fontStyle=0;spacing=0;" value="Private ClientAdapter / SessionAdapter&#xa;  wrap SDK objects." vertex="1">
+          <mxGeometry height="36" width="320" x="10" y="80" as="geometry" />
+        </mxCell>
+        <mxCell id="conversation" parent="1" style="rounded=0;html=0;fillColor=#e7f0ff;strokeColor=#475569;strokeWidth=1.4;container=1;collapsible=0;" value="" vertex="1">
+          <mxGeometry height="240" width="420" x="75" y="220" as="geometry" />
+        </mxCell>
+        <mxCell id="conversation-title" parent="conversation" style="text;html=0;whiteSpace=wrap;overflow=hidden;align=center;verticalAlign=middle;fontFamily=Helvetica;fontSize=14;fontColor=#0f172a;fontStyle=1;spacing=0;" value="Conversation" vertex="1">
+          <mxGeometry height="30" width="404" x="8" y="6" as="geometry" />
+        </mxCell>
+        <mxCell id="conversation-divider-0" parent="conversation" style="line;strokeColor=#64748b;strokeWidth=1;" value="" vertex="1">
+          <mxGeometry width="420" y="42" as="geometry" />
+        </mxCell>
+        <mxCell id="conversation-body-0" parent="conversation" style="text;html=0;whiteSpace=wrap;overflow=hidden;align=left;verticalAlign=middle;fontFamily=Helvetica;fontSize=12;fontColor=#1e293b;fontStyle=0;spacing=0;" value="+ Id: Guid {private set}&#xa;+ StartedAt: DateTimeOffset {private set}&#xa;+ LastActivityAt: DateTimeOffset {private set}&#xa;+ Status: ConversationStatus {private set}&#xa;+ Messages: IReadOnlyCollection&lt;ChatMessage&gt;" vertex="1">
+          <mxGeometry height="87" width="400" x="10" y="48" as="geometry" />
+        </mxCell>
+        <mxCell id="conversation-divider-1" parent="conversation" style="line;strokeColor=#64748b;strokeWidth=1;" value="" vertex="1">
+          <mxGeometry width="420" y="141" as="geometry" />
+        </mxCell>
+        <mxCell id="conversation-body-1" parent="conversation" style="text;html=0;whiteSpace=wrap;overflow=hidden;align=left;verticalAlign=middle;fontFamily=Helvetica;fontSize=12;fontColor=#1e293b;fontStyle=0;spacing=0;" value="+ AddMessage(role: MessageRole, content: string):&#xa;  ChatMessage&#xa;+ Close(): void&#xa;+ Restore(id, startedAt, lastActivityAt, status,&#xa;  restoredMessages): Conversation {static}" vertex="1">
+          <mxGeometry height="87" width="400" x="10" y="147" as="geometry" />
+        </mxCell>
+        <mxCell id="domain-message" parent="1" style="rounded=0;html=0;fillColor=#e7f0ff;strokeColor=#475569;strokeWidth=1.4;container=1;collapsible=0;" value="" vertex="1">
+          <mxGeometry height="206" width="375" x="550" y="220" as="geometry" />
+        </mxCell>
+        <mxCell id="domain-message-title" parent="domain-message" style="text;html=0;whiteSpace=wrap;overflow=hidden;align=center;verticalAlign=middle;fontFamily=Helvetica;fontSize=14;fontColor=#0f172a;fontStyle=1;spacing=0;" value="ChatMessage" vertex="1">
+          <mxGeometry height="30" width="359" x="8" y="6" as="geometry" />
+        </mxCell>
+        <mxCell id="domain-message-divider-0" parent="domain-message" style="line;strokeColor=#64748b;strokeWidth=1;" value="" vertex="1">
+          <mxGeometry width="375" y="42" as="geometry" />
+        </mxCell>
+        <mxCell id="domain-message-body-0" parent="domain-message" style="text;html=0;whiteSpace=wrap;overflow=hidden;align=left;verticalAlign=middle;fontFamily=Helvetica;fontSize=12;fontColor=#1e293b;fontStyle=0;spacing=0;" value="+ Id: Guid {private set}&#xa;+ ConversationId: Guid {private set}&#xa;+ Role: MessageRole {private set}&#xa;+ Content: string {private set}&#xa;+ SentAt: DateTimeOffset {private set}&#xa;+ /IsFromAgent: bool" vertex="1">
+          <mxGeometry height="104" width="355" x="10" y="48" as="geometry" />
+        </mxCell>
+        <mxCell id="domain-message-divider-1" parent="domain-message" style="line;strokeColor=#64748b;strokeWidth=1;" value="" vertex="1">
+          <mxGeometry width="375" y="158" as="geometry" />
+        </mxCell>
+        <mxCell id="domain-message-body-1" parent="domain-message" style="text;html=0;whiteSpace=wrap;overflow=hidden;align=left;verticalAlign=middle;fontFamily=Helvetica;fontSize=12;fontColor=#1e293b;fontStyle=0;spacing=0;" value="+ Restore(id, conversationId, role, content,&#xa;  sentAt): ChatMessage {static}" vertex="1">
+          <mxGeometry height="36" width="355" x="10" y="164" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-1" edge="1" parent="1" source="conversation" style="edgeStyle=segmentEdgeStyle;rounded=0;html=0;strokeColor=#475569;strokeWidth=1.5;fontSize=13;labelBackgroundColor=#ffffff;startArrow=diamond;startFill=1;endArrow=none;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="domain-message" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="522.5" y="340" />
+              <mxPoint x="522.5" y="323" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge-1-label" connectable="0" parent="edge-1" style="text;html=0;whiteSpace=wrap;align=center;verticalAlign=middle;fontSize=12;fontColor=#334155;fillColor=#ffffff;strokeColor=none;" value="messages" vertex="1">
+          <mxGeometry height="21" relative="1" width="73.2" x="-1" as="geometry">
+            <mxPoint x="-9.600000000000001" y="-145.5" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="status" parent="1" style="rounded=0;html=0;fillColor=#e7f0ff;strokeColor=#475569;strokeWidth=1.4;container=1;collapsible=0;" value="" vertex="1">
+          <mxGeometry height="100" width="235" x="75" y="630" as="geometry" />
+        </mxCell>
+        <mxCell id="status-title" parent="status" style="text;html=0;whiteSpace=wrap;overflow=hidden;align=center;verticalAlign=middle;fontFamily=Helvetica;fontSize=14;fontColor=#0f172a;fontStyle=1;spacing=0;" value="«enumeration»&#xa;ConversationStatus" vertex="1">
+          <mxGeometry height="40" width="219" x="8" y="6" as="geometry" />
+        </mxCell>
+        <mxCell id="status-divider-0" parent="status" style="line;strokeColor=#64748b;strokeWidth=1;" value="" vertex="1">
+          <mxGeometry width="235" y="52" as="geometry" />
+        </mxCell>
+        <mxCell id="status-body-0" parent="status" style="text;html=0;whiteSpace=wrap;overflow=hidden;align=left;verticalAlign=middle;fontFamily=Helvetica;fontSize=12;fontColor=#1e293b;fontStyle=0;spacing=0;" value="Active&#xa;Closed" vertex="1">
+          <mxGeometry height="36" width="215" x="10" y="58" as="geometry" />
+        </mxCell>
+        <mxCell id="role" parent="1" style="rounded=0;html=0;fillColor=#e7f0ff;strokeColor=#475569;strokeWidth=1.4;container=1;collapsible=0;" value="" vertex="1">
+          <mxGeometry height="117" width="265" x="660" y="630" as="geometry" />
+        </mxCell>
+        <mxCell id="role-title" parent="role" style="text;html=0;whiteSpace=wrap;overflow=hidden;align=center;verticalAlign=middle;fontFamily=Helvetica;fontSize=14;fontColor=#0f172a;fontStyle=1;spacing=0;" value="«enumeration»&#xa;MessageRole" vertex="1">
+          <mxGeometry height="40" width="249" x="8" y="6" as="geometry" />
+        </mxCell>
+        <mxCell id="role-divider-0" parent="role" style="line;strokeColor=#64748b;strokeWidth=1;" value="" vertex="1">
+          <mxGeometry width="265" y="52" as="geometry" />
+        </mxCell>
+        <mxCell id="role-body-0" parent="role" style="text;html=0;whiteSpace=wrap;overflow=hidden;align=left;verticalAlign=middle;fontFamily=Helvetica;fontSize=12;fontColor=#1e293b;fontStyle=0;spacing=0;" value="Customer&#xa;Assistant&#xa;System" vertex="1">
+          <mxGeometry height="53" width="245" x="10" y="58" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-4" edge="1" parent="1" source="conversation" style="edgeStyle=segmentEdgeStyle;rounded=0;html=0;strokeColor=#475569;strokeWidth=1.5;fontSize=13;labelBackgroundColor=#ffffff;dashed=1;endArrow=open;endFill=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="status" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="285" y="545" />
+              <mxPoint x="192.5" y="545" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge-5" edge="1" parent="1" source="domain-message" style="edgeStyle=segmentEdgeStyle;rounded=0;html=0;strokeColor=#475569;strokeWidth=1.5;fontSize=13;labelBackgroundColor=#ffffff;dashed=1;endArrow=open;endFill=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="role" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="737.5" y="528" />
+              <mxPoint x="792.5" y="528" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="sanitizer" parent="1" style="rounded=0;html=0;fillColor=#e7f0ff;strokeColor=#475569;strokeWidth=1.4;container=1;collapsible=0;" value="" vertex="1">
+          <mxGeometry height="100" width="670" x="180" y="875" as="geometry" />
+        </mxCell>
+        <mxCell id="sanitizer-title" parent="sanitizer" style="text;html=0;whiteSpace=wrap;overflow=hidden;align=center;verticalAlign=middle;fontFamily=Helvetica;fontSize=14;fontColor=#0f172a;fontStyle=1;spacing=0;" value="«static»&#xa;ChatContentSanitizer" vertex="1">
+          <mxGeometry height="40" width="654" x="8" y="6" as="geometry" />
+        </mxCell>
+        <mxCell id="sanitizer-divider-0" parent="sanitizer" style="line;strokeColor=#64748b;strokeWidth=1;" value="" vertex="1">
+          <mxGeometry width="670" y="52" as="geometry" />
+        </mxCell>
+        <mxCell id="sanitizer-body-0" parent="sanitizer" style="text;html=0;whiteSpace=wrap;overflow=hidden;align=left;verticalAlign=middle;fontFamily=Helvetica;fontSize=12;fontColor=#1e293b;fontStyle=0;spacing=0;" value="+ EnsureSafeUserContent(content: string): void&#xa;+ EnsureSafeAgentResponse(content: string): void" vertex="1">
+          <mxGeometry height="36" width="650" x="10" y="58" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-6" edge="1" parent="1" source="conversation" style="edgeStyle=segmentEdgeStyle;rounded=0;html=0;strokeColor=#475569;strokeWidth=1.5;fontSize=13;labelBackgroundColor=#ffffff;dashed=1;endArrow=open;endFill=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="sanitizer" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="285" y="590" />
+              <mxPoint x="520" y="590" />
+              <mxPoint x="520" y="815" />
+              <mxPoint x="130" y="815" />
+              <mxPoint x="130" y="924" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge-6-label" connectable="0" parent="edge-6" style="text;html=0;whiteSpace=wrap;align=center;verticalAlign=middle;fontSize=12;fontColor=#334155;fillColor=#ffffff;strokeColor=none;" value="screens customer content" vertex="1">
+          <mxGeometry height="21" relative="1" width="191.60000000000002" x="-1" as="geometry">
+            <mxPoint x="-35.80000000000001" y="341.5" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="chat-interface" parent="1" style="rounded=0;html=0;fillColor=#e5f5ed;strokeColor=#475569;strokeWidth=1.4;container=1;collapsible=0;" value="" vertex="1">
+          <mxGeometry height="185" width="670" x="1040" y="220" as="geometry" />
+        </mxCell>
+        <mxCell id="chat-interface-title" parent="chat-interface" style="text;html=0;whiteSpace=wrap;overflow=hidden;align=center;verticalAlign=middle;fontFamily=Helvetica;fontSize=14;fontColor=#0f172a;fontStyle=1;spacing=0;" value="«interface»&#xa;IChatService" vertex="1">
+          <mxGeometry height="40" width="654" x="8" y="6" as="geometry" />
+        </mxCell>
+        <mxCell id="chat-interface-divider-0" parent="chat-interface" style="line;strokeColor=#64748b;strokeWidth=1;" value="" vertex="1">
+          <mxGeometry width="670" y="52" as="geometry" />
+        </mxCell>
+        <mxCell id="chat-interface-body-0" parent="chat-interface" style="text;html=0;whiteSpace=wrap;overflow=hidden;align=left;verticalAlign=middle;fontFamily=Helvetica;fontSize=12;fontColor=#1e293b;fontStyle=0;spacing=0;" value="+ StartConversationAsync(CT): Task&lt;Conversation&gt;&#xa;+ GetConversationAsync(id: string, CT): Task&lt;Conversation&gt;&#xa;+ GetConversationsAsync(CT): Task&lt;IReadOnlyList&lt;Conversation&gt;&gt;&#xa;+ GetActiveConversationAsync(CT): Task&lt;Conversation?&gt;&#xa;+ AddMessageAsync(id: string, role: MessageRole, content: string, CT): Task&lt;ChatMessage&gt;&#xa;+ SendMessageAsync(id: string, content: string, CT): Task&lt;ChatMessage&gt;&#xa;+ CloseConversationAsync(id: string, CT): Task" vertex="1">
+          <mxGeometry height="121" width="650" x="10" y="58" as="geometry" />
+        </mxCell>
+        <mxCell id="chat-service" parent="1" style="rounded=0;html=0;fillColor=#e5f5ed;strokeColor=#475569;strokeWidth=1.4;container=1;collapsible=0;" value="" vertex="1">
+          <mxGeometry height="172" width="670" x="1040" y="675" as="geometry" />
+        </mxCell>
+        <mxCell id="chat-service-title" parent="chat-service" style="text;html=0;whiteSpace=wrap;overflow=hidden;align=center;verticalAlign=middle;fontFamily=Helvetica;fontSize=14;fontColor=#0f172a;fontStyle=1;spacing=0;" value="ChatService" vertex="1">
+          <mxGeometry height="30" width="654" x="8" y="6" as="geometry" />
+        </mxCell>
+        <mxCell id="chat-service-divider-0" parent="chat-service" style="line;strokeColor=#64748b;strokeWidth=1;" value="" vertex="1">
+          <mxGeometry width="670" y="42" as="geometry" />
+        </mxCell>
+        <mxCell id="chat-service-body-0" parent="chat-service" style="text;html=0;whiteSpace=wrap;overflow=hidden;align=left;verticalAlign=middle;fontFamily=Helvetica;fontSize=12;fontColor=#1e293b;fontStyle=0;spacing=0;" value="− chatAgent: IChatAgent&#xa;− conversationRepository: IConversationRepository&#xa;− currentUser: ICurrentUser&#xa;− operationLock: SemaphoreSlim" vertex="1">
+          <mxGeometry height="70" width="650" x="10" y="48" as="geometry" />
+        </mxCell>
+        <mxCell id="chat-service-divider-1" parent="chat-service" style="line;strokeColor=#64748b;strokeWidth=1;" value="" vertex="1">
+          <mxGeometry width="670" y="124" as="geometry" />
+        </mxCell>
+        <mxCell id="chat-service-body-1" parent="chat-service" style="text;html=0;whiteSpace=wrap;overflow=hidden;align=left;verticalAlign=middle;fontFamily=Helvetica;fontSize=12;fontColor=#475569;fontStyle=0;spacing=0;" value="Implements all IChatService operations." vertex="1">
+          <mxGeometry height="36" width="650" x="10" y="130" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-7" edge="1" parent="1" source="chat-service" style="edgeStyle=segmentEdgeStyle;rounded=0;html=0;strokeColor=#475569;strokeWidth=1.5;fontSize=13;labelBackgroundColor=#ffffff;dashed=1;endArrow=block;endFill=0;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" target="chat-interface" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-8" edge="1" parent="1" source="chat-service" style="edgeStyle=segmentEdgeStyle;rounded=0;html=0;strokeColor=#475569;strokeWidth=1.5;fontSize=13;labelBackgroundColor=#ffffff;dashed=1;endArrow=open;endFill=0;exitX=0;exitY=0.5;exitDx=0;exitDy=0;" target="conversation" value="">
+          <mxGeometry relative="1" x="0.0428" as="geometry">
+            <Array as="points">
+              <mxPoint x="1040" y="765" />
+              <mxPoint x="980" y="765" />
+              <mxPoint x="980" y="575" />
+              <mxPoint x="530" y="575" />
+              <mxPoint x="530" y="380" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge-8-label" connectable="0" parent="edge-8" style="text;html=0;whiteSpace=wrap;align=center;verticalAlign=middle;fontSize=12;fontColor=#334155;fillColor=#ffffff;strokeColor=none;" value="loads / changes / returns" vertex="1">
+          <mxGeometry height="21" relative="1" width="199" x="-1" as="geometry">
+            <mxPoint x="-490" y="-197" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="current-user" parent="1" style="rounded=0;html=0;fillColor=#e5f5ed;strokeColor=#475569;strokeWidth=1.4;container=1;collapsible=0;" value="" vertex="1">
+          <mxGeometry height="84" width="255" x="1040" y="1010" as="geometry" />
+        </mxCell>
+        <mxCell id="current-user-title" parent="current-user" style="text;html=0;whiteSpace=wrap;overflow=hidden;align=center;verticalAlign=middle;fontFamily=Helvetica;fontSize=14;fontColor=#0f172a;fontStyle=1;spacing=0;" value="«interface»&#xa;ICurrentUser" vertex="1">
+          <mxGeometry height="40" width="239" x="8" y="6" as="geometry" />
+        </mxCell>
+        <mxCell id="current-user-divider-0" parent="current-user" style="line;strokeColor=#64748b;strokeWidth=1;" value="" vertex="1">
+          <mxGeometry width="255" y="52" as="geometry" />
+        </mxCell>
+        <mxCell id="current-user-body-0" parent="current-user" style="text;html=0;whiteSpace=wrap;overflow=hidden;align=left;verticalAlign=middle;fontFamily=Helvetica;fontSize=12;fontColor=#1e293b;fontStyle=0;spacing=0;" value="+ UserId: int {get}" vertex="1">
+          <mxGeometry height="20" width="235" x="10" y="58" as="geometry" />
+        </mxCell>
+        <mxCell id="config-user" parent="1" style="rounded=0;html=0;fillColor=#e5f5ed;strokeColor=#475569;strokeWidth=1.4;container=1;collapsible=0;" value="" vertex="1">
+          <mxGeometry height="122" width="350" x="1360" y="1010" as="geometry" />
+        </mxCell>
+        <mxCell id="config-user-title" parent="config-user" style="text;html=0;whiteSpace=wrap;overflow=hidden;align=center;verticalAlign=middle;fontFamily=Helvetica;fontSize=14;fontColor=#0f172a;fontStyle=1;spacing=0;" value="ConfigurationCurrentUser" vertex="1">
+          <mxGeometry height="30" width="334" x="8" y="6" as="geometry" />
+        </mxCell>
+        <mxCell id="config-user-divider-0" parent="config-user" style="line;strokeColor=#64748b;strokeWidth=1;" value="" vertex="1">
+          <mxGeometry width="350" y="42" as="geometry" />
+        </mxCell>
+        <mxCell id="config-user-body-0" parent="config-user" style="text;html=0;whiteSpace=wrap;overflow=hidden;align=left;verticalAlign=middle;fontFamily=Helvetica;fontSize=12;fontColor=#1e293b;fontStyle=0;spacing=0;" value="+ UserId: int {get}" vertex="1">
+          <mxGeometry height="20" width="330" x="10" y="48" as="geometry" />
+        </mxCell>
+        <mxCell id="config-user-divider-1" parent="config-user" style="line;strokeColor=#64748b;strokeWidth=1;" value="" vertex="1">
+          <mxGeometry width="350" y="74" as="geometry" />
+        </mxCell>
+        <mxCell id="config-user-body-1" parent="config-user" style="text;html=0;whiteSpace=wrap;overflow=hidden;align=left;verticalAlign=middle;fontFamily=Helvetica;fontSize=12;fontColor=#475569;fontStyle=0;spacing=0;" value="Reads Chat:DevelopmentUserId from&#xa;  IConfiguration." vertex="1">
+          <mxGeometry height="36" width="330" x="10" y="80" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-9" edge="1" parent="1" source="config-user" style="edgeStyle=segmentEdgeStyle;rounded=0;html=0;strokeColor=#475569;strokeWidth=1.5;fontSize=13;labelBackgroundColor=#ffffff;dashed=1;endArrow=block;endFill=0;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" target="current-user" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1327.5" y="1071" />
+              <mxPoint x="1327.5" y="1052" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge-10" edge="1" parent="1" source="chat-service" style="edgeStyle=segmentEdgeStyle;rounded=0;html=0;strokeColor=#475569;strokeWidth=1.5;fontSize=13;labelBackgroundColor=#ffffff;dashed=1;endArrow=open;endFill=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="current-user" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1375" y="960" />
+              <mxPoint x="1167" y="960" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge-10-label" connectable="0" parent="edge-10" style="text;html=0;whiteSpace=wrap;align=center;verticalAlign=middle;fontSize=12;fontColor=#334155;fillColor=#ffffff;strokeColor=none;" value="owner identity" vertex="1">
+          <mxGeometry height="21" relative="1" width="117.60000000000001" x="-1" as="geometry">
+            <mxPoint x="-183.8" y="100.5" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="repo-interface" parent="1" style="rounded=0;html=0;fillColor=#e5f5ed;strokeColor=#475569;strokeWidth=1.4;container=1;collapsible=0;" value="" vertex="1">
+          <mxGeometry height="151" width="670" x="1040" y="1260" as="geometry" />
+        </mxCell>
+        <mxCell id="repo-interface-title" parent="repo-interface" style="text;html=0;whiteSpace=wrap;overflow=hidden;align=center;verticalAlign=middle;fontFamily=Helvetica;fontSize=14;fontColor=#0f172a;fontStyle=1;spacing=0;" value="«interface»&#xa;IConversationRepository" vertex="1">
+          <mxGeometry height="40" width="654" x="8" y="6" as="geometry" />
+        </mxCell>
+        <mxCell id="repo-interface-divider-0" parent="repo-interface" style="line;strokeColor=#64748b;strokeWidth=1;" value="" vertex="1">
+          <mxGeometry width="670" y="52" as="geometry" />
+        </mxCell>
+        <mxCell id="repo-interface-body-0" parent="repo-interface" style="text;html=0;whiteSpace=wrap;overflow=hidden;align=left;verticalAlign=middle;fontFamily=Helvetica;fontSize=12;fontColor=#1e293b;fontStyle=0;spacing=0;" value="+ AddAsync(conversation, userId: int, CT): Task&#xa;+ GetAsync(id: Guid, userId: int, CT): Task&lt;Conversation?&gt;&#xa;+ GetAllAsync(userId: int, CT): Task&lt;IReadOnlyList&lt;Conversation&gt;&gt;&#xa;+ GetLatestActiveAsync(userId: int, CT): Task&lt;Conversation?&gt;&#xa;+ SaveAsync(conversation, userId: int, CT): Task" vertex="1">
+          <mxGeometry height="87" width="650" x="10" y="58" as="geometry" />
+        </mxCell>
+        <mxCell id="repo" parent="1" style="rounded=0;html=0;fillColor=#e5f5ed;strokeColor=#475569;strokeWidth=1.4;container=1;collapsible=0;" value="" vertex="1">
+          <mxGeometry height="188" width="670" x="1040" y="1520" as="geometry" />
+        </mxCell>
+        <mxCell id="repo-title" parent="repo" style="text;html=0;whiteSpace=wrap;overflow=hidden;align=center;verticalAlign=middle;fontFamily=Helvetica;fontSize=14;fontColor=#0f172a;fontStyle=1;spacing=0;" value="SqliteConversationRepository" vertex="1">
+          <mxGeometry height="30" width="654" x="8" y="6" as="geometry" />
+        </mxCell>
+        <mxCell id="repo-divider-0" parent="repo" style="line;strokeColor=#64748b;strokeWidth=1;" value="" vertex="1">
+          <mxGeometry width="670" y="42" as="geometry" />
+        </mxCell>
+        <mxCell id="repo-body-0" parent="repo" style="text;html=0;whiteSpace=wrap;overflow=hidden;align=left;verticalAlign=middle;fontFamily=Helvetica;fontSize=12;fontColor=#1e293b;fontStyle=0;spacing=0;" value="− dbContextFactory: IDbContextFactory&lt;ApplicationDbContext&gt;" vertex="1">
+          <mxGeometry height="20" width="650" x="10" y="48" as="geometry" />
+        </mxCell>
+        <mxCell id="repo-divider-1" parent="repo" style="line;strokeColor=#64748b;strokeWidth=1;" value="" vertex="1">
+          <mxGeometry width="670" y="74" as="geometry" />
+        </mxCell>
+        <mxCell id="repo-body-1" parent="repo" style="text;html=0;whiteSpace=wrap;overflow=hidden;align=left;verticalAlign=middle;fontFamily=Helvetica;fontSize=12;fontColor=#1e293b;fontStyle=0;spacing=0;" value="− ToEntity(message: Domain.ChatMessage, userId: int): Data.Entities.Message {static}&#xa;− ToDomain(entity: Data.Entities.Conversation): Domain.Conversation {static}&#xa;− CopyConversation(source: Domain.Conversation, destination:&#xa;  Data.Entities.Conversation): void {static}" vertex="1">
+          <mxGeometry height="70" width="650" x="10" y="80" as="geometry" />
+        </mxCell>
+        <mxCell id="repo-divider-2" parent="repo" style="line;strokeColor=#64748b;strokeWidth=1;" value="" vertex="1">
+          <mxGeometry width="670" y="156" as="geometry" />
+        </mxCell>
+        <mxCell id="repo-body-2" parent="repo" style="text;html=0;whiteSpace=wrap;overflow=hidden;align=left;verticalAlign=middle;fontFamily=Helvetica;fontSize=12;fontColor=#475569;fontStyle=0;spacing=0;" value="Implements repository operations and maps domain objects to Data.Entities and back." vertex="1">
+          <mxGeometry height="20" width="650" x="10" y="162" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-11" edge="1" parent="1" source="repo" style="edgeStyle=segmentEdgeStyle;rounded=0;html=0;strokeColor=#475569;strokeWidth=1.5;fontSize=13;labelBackgroundColor=#ffffff;dashed=1;endArrow=block;endFill=0;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" target="repo-interface" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-12" edge="1" parent="1" source="chat-service" style="edgeStyle=segmentEdgeStyle;rounded=0;html=0;strokeColor=#475569;strokeWidth=1.5;fontSize=13;labelBackgroundColor=#ffffff;dashed=1;endArrow=open;endFill=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" target="repo-interface" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1730" y="765" />
+              <mxPoint x="1730" y="1350" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge-12-label" connectable="0" parent="edge-12" style="text;html=0;whiteSpace=wrap;align=center;verticalAlign=middle;fontSize=12;fontColor=#334155;fillColor=#ffffff;strokeColor=none;" value="owned persistence" vertex="1">
+          <mxGeometry height="21" relative="1" width="139.8" x="-1" as="geometry">
+            <mxPoint x="-80" y="379" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="db-factory" parent="1" style="rounded=0;html=0;fillColor=#f1f3f5;strokeColor=#475569;strokeWidth=1.4;container=1;collapsible=0;" value="" vertex="1">
+          <mxGeometry height="118" width="350" x="1040" y="1890" as="geometry" />
+        </mxCell>
+        <mxCell id="db-factory-title" parent="db-factory" style="text;html=0;whiteSpace=wrap;overflow=hidden;align=center;verticalAlign=middle;fontFamily=Helvetica;fontSize=14;fontColor=#0f172a;fontStyle=1;spacing=0;" value="«external interface»&#xa;IDbContextFactory&lt;ApplicationDbContext&#xa;  &gt;" vertex="1">
+          <mxGeometry height="58" width="334" x="8" y="6" as="geometry" />
+        </mxCell>
+        <mxCell id="db-factory-divider-0" parent="db-factory" style="line;strokeColor=#64748b;strokeWidth=1;" value="" vertex="1">
+          <mxGeometry width="350" y="70" as="geometry" />
+        </mxCell>
+        <mxCell id="db-factory-body-0" parent="db-factory" style="text;html=0;whiteSpace=wrap;overflow=hidden;align=left;verticalAlign=middle;fontFamily=Helvetica;fontSize=12;fontColor=#1e293b;fontStyle=0;spacing=0;" value="+ CreateDbContextAsync(CT):&#xa;  Task&lt;ApplicationDbContext&gt;" vertex="1">
+          <mxGeometry height="36" width="330" x="10" y="76" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-13" edge="1" parent="1" source="repo" style="edgeStyle=segmentEdgeStyle;rounded=0;html=0;strokeColor=#475569;strokeWidth=1.5;fontSize=13;labelBackgroundColor=#ffffff;dashed=1;endArrow=open;endFill=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="db-factory" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1375" y="1835" />
+              <mxPoint x="1215" y="1835" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="agent-interface" parent="1" style="rounded=0;html=0;fillColor=#fff2d5;strokeColor=#475569;strokeWidth=1.4;container=1;collapsible=0;" value="" vertex="1">
+          <mxGeometry height="84" width="690" x="1960" y="220" as="geometry" />
+        </mxCell>
+        <mxCell id="agent-interface-title" parent="agent-interface" style="text;html=0;whiteSpace=wrap;overflow=hidden;align=center;verticalAlign=middle;fontFamily=Helvetica;fontSize=14;fontColor=#0f172a;fontStyle=1;spacing=0;" value="«interface»&#xa;IChatAgent" vertex="1">
+          <mxGeometry height="40" width="674" x="8" y="6" as="geometry" />
+        </mxCell>
+        <mxCell id="agent-interface-divider-0" parent="agent-interface" style="line;strokeColor=#64748b;strokeWidth=1;" value="" vertex="1">
+          <mxGeometry width="690" y="52" as="geometry" />
+        </mxCell>
+        <mxCell id="agent-interface-body-0" parent="agent-interface" style="text;html=0;whiteSpace=wrap;overflow=hidden;align=left;verticalAlign=middle;fontFamily=Helvetica;fontSize=12;fontColor=#1e293b;fontStyle=0;spacing=0;" value="+ GetReplyAsync(history: IReadOnlyList&lt;ChatMessage&gt;, CT): Task&lt;AgentChatResponse&gt;" vertex="1">
+          <mxGeometry height="20" width="670" x="10" y="58" as="geometry" />
+        </mxCell>
+        <mxCell id="base-agent" parent="1" style="rounded=0;html=0;fillColor=#fff2d5;strokeColor=#475569;strokeWidth=1.4;container=1;collapsible=0;" value="" vertex="1">
+          <mxGeometry height="132" width="690" x="1960" y="445" as="geometry" />
+        </mxCell>
+        <mxCell id="base-agent-title" parent="base-agent" style="text;html=0;whiteSpace=wrap;overflow=hidden;align=center;verticalAlign=middle;fontFamily=Helvetica;fontSize=14;fontColor=#0f172a;fontStyle=1;spacing=0;" value="«abstract»&#xa;ChatAgentBase" vertex="1">
+          <mxGeometry height="40" width="674" x="8" y="6" as="geometry" />
+        </mxCell>
+        <mxCell id="base-agent-divider-0" parent="base-agent" style="line;strokeColor=#64748b;strokeWidth=1;" value="" vertex="1">
+          <mxGeometry width="690" y="52" as="geometry" />
+        </mxCell>
+        <mxCell id="base-agent-body-0" parent="base-agent" style="text;html=0;whiteSpace=wrap;overflow=hidden;align=left;verticalAlign=middle;fontFamily=Helvetica;fontSize=12;fontColor=#1e293b;fontStyle=0;spacing=0;" value="+ GetReplyAsync(history, CT): Task&lt;AgentChatResponse&gt;&#xa;# GetReplyCoreAsync(history, CT): Task&lt;AgentChatResponse&gt; {abstract}" vertex="1">
+          <mxGeometry height="36" width="670" x="10" y="58" as="geometry" />
+        </mxCell>
+        <mxCell id="base-agent-divider-1" parent="base-agent" style="line;strokeColor=#64748b;strokeWidth=1;" value="" vertex="1">
+          <mxGeometry width="690" y="100" as="geometry" />
+        </mxCell>
+        <mxCell id="base-agent-body-1" parent="base-agent" style="text;html=0;whiteSpace=wrap;overflow=hidden;align=left;verticalAlign=middle;fontFamily=Helvetica;fontSize=12;fontColor=#475569;fontStyle=0;spacing=0;" value="Validates history; replaces blocked responses with a fixed explanation." vertex="1">
+          <mxGeometry height="20" width="670" x="10" y="106" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-14" edge="1" parent="1" source="base-agent" style="edgeStyle=segmentEdgeStyle;rounded=0;html=0;strokeColor=#475569;strokeWidth=1.5;fontSize=13;labelBackgroundColor=#ffffff;dashed=1;endArrow=block;endFill=0;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" target="agent-interface" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-15" edge="1" parent="1" source="chat-service" style="edgeStyle=segmentEdgeStyle;rounded=0;html=0;strokeColor=#475569;strokeWidth=1.5;fontSize=13;labelBackgroundColor=#ffffff;dashed=1;endArrow=open;endFill=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="agent-interface" value="">
+          <mxGeometry relative="1" x="0.0013" as="geometry">
+            <Array as="points">
+              <mxPoint x="1710" y="765" />
+              <mxPoint x="1765" y="765" />
+              <mxPoint x="1765" y="262" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge-15-label" connectable="0" parent="edge-15" style="text;html=0;whiteSpace=wrap;align=center;verticalAlign=middle;fontSize=12;fontColor=#334155;fillColor=#ffffff;strokeColor=none;" value="requests replies" vertex="1">
+          <mxGeometry height="21" relative="1" width="132.4" x="-1" as="geometry">
+            <mxPoint x="90" y="-509" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="offline" parent="1" style="rounded=0;html=0;fillColor=#fff2d5;strokeColor=#475569;strokeWidth=1.4;container=1;collapsible=0;" value="" vertex="1">
+          <mxGeometry height="90" width="280" x="1830" y="820" as="geometry" />
+        </mxCell>
+        <mxCell id="offline-title" parent="offline" style="text;html=0;whiteSpace=wrap;overflow=hidden;align=center;verticalAlign=middle;fontFamily=Helvetica;fontSize=14;fontColor=#0f172a;fontStyle=1;spacing=0;" value="OfflineChatAgent" vertex="1">
+          <mxGeometry height="30" width="264" x="8" y="6" as="geometry" />
+        </mxCell>
+        <mxCell id="offline-divider-0" parent="offline" style="line;strokeColor=#64748b;strokeWidth=1;" value="" vertex="1">
+          <mxGeometry width="280" y="42" as="geometry" />
+        </mxCell>
+        <mxCell id="offline-body-0" parent="offline" style="text;html=0;whiteSpace=wrap;overflow=hidden;align=left;verticalAlign=middle;fontFamily=Helvetica;fontSize=12;fontColor=#1e293b;fontStyle=0;spacing=0;" value="# GetReplyCoreAsync(history, CT):&#xa;  Task&lt;AgentChatResponse&gt;" vertex="1">
+          <mxGeometry height="36" width="260" x="10" y="48" as="geometry" />
+        </mxCell>
+        <mxCell id="copilot" parent="1" style="rounded=0;html=0;fillColor=#fff2d5;strokeColor=#475569;strokeWidth=1.4;container=1;collapsible=0;" value="" vertex="1">
+          <mxGeometry height="139" width="350" x="2150" y="820" as="geometry" />
+        </mxCell>
+        <mxCell id="copilot-title" parent="copilot" style="text;html=0;whiteSpace=wrap;overflow=hidden;align=center;verticalAlign=middle;fontFamily=Helvetica;fontSize=14;fontColor=#0f172a;fontStyle=1;spacing=0;" value="GitHubCopilotAgent" vertex="1">
+          <mxGeometry height="30" width="334" x="8" y="6" as="geometry" />
+        </mxCell>
+        <mxCell id="copilot-divider-0" parent="copilot" style="line;strokeColor=#64748b;strokeWidth=1;" value="" vertex="1">
+          <mxGeometry width="350" y="42" as="geometry" />
+        </mxCell>
+        <mxCell id="copilot-body-0" parent="copilot" style="text;html=0;whiteSpace=wrap;overflow=hidden;align=left;verticalAlign=middle;fontFamily=Helvetica;fontSize=12;fontColor=#1e293b;fontStyle=0;spacing=0;" value="− clientFactory: ICopilotClientFactory" vertex="1">
+          <mxGeometry height="20" width="330" x="10" y="48" as="geometry" />
+        </mxCell>
+        <mxCell id="copilot-divider-1" parent="copilot" style="line;strokeColor=#64748b;strokeWidth=1;" value="" vertex="1">
+          <mxGeometry width="350" y="74" as="geometry" />
+        </mxCell>
+        <mxCell id="copilot-body-1" parent="copilot" style="text;html=0;whiteSpace=wrap;overflow=hidden;align=left;verticalAlign=middle;fontFamily=Helvetica;fontSize=12;fontColor=#1e293b;fontStyle=0;spacing=0;" value="# GetReplyCoreAsync(history, CT):&#xa;  Task&lt;AgentChatResponse&gt;&#xa;~ BuildTranscript(history): string {static}" vertex="1">
+          <mxGeometry height="53" width="330" x="10" y="80" as="geometry" />
+        </mxCell>
+        <mxCell id="fallback" parent="1" style="rounded=0;html=0;fillColor=#fff2d5;strokeColor=#475569;strokeWidth=1.4;container=1;collapsible=0;" value="" vertex="1">
+          <mxGeometry height="172" width="250" x="2590" y="820" as="geometry" />
+        </mxCell>
+        <mxCell id="fallback-title" parent="fallback" style="text;html=0;whiteSpace=wrap;overflow=hidden;align=center;verticalAlign=middle;fontFamily=Helvetica;fontSize=14;fontColor=#0f172a;fontStyle=1;spacing=0;" value="CopilotFallbackChatAgent" vertex="1">
+          <mxGeometry height="30" width="236.66666666666669" x="6.666666666666667" y="6" as="geometry" />
+        </mxCell>
+        <mxCell id="fallback-divider-0" parent="fallback" style="line;strokeColor=#64748b;strokeWidth=1;" value="" vertex="1">
+          <mxGeometry width="250" y="42" as="geometry" />
+        </mxCell>
+        <mxCell id="fallback-body-0" parent="fallback" style="text;html=0;whiteSpace=wrap;overflow=hidden;align=left;verticalAlign=middle;fontFamily=Helvetica;fontSize=12;fontColor=#1e293b;fontStyle=0;spacing=0;" value="− copilotAgent: GitHubCopilotAgent&#xa;− offlineAgent: OfflineChatAgent&#xa;− responseTimeout: TimeSpan&#xa;− offlineMode: bool" vertex="1">
+          <mxGeometry height="70" width="233.33333333333334" x="8.333333333333334" y="48" as="geometry" />
+        </mxCell>
+        <mxCell id="fallback-divider-1" parent="fallback" style="line;strokeColor=#64748b;strokeWidth=1;" value="" vertex="1">
+          <mxGeometry width="250" y="124" as="geometry" />
+        </mxCell>
+        <mxCell id="fallback-body-1" parent="fallback" style="text;html=0;whiteSpace=wrap;overflow=hidden;align=left;verticalAlign=middle;fontFamily=Helvetica;fontSize=12;fontColor=#1e293b;fontStyle=0;spacing=0;" value="# GetReplyCoreAsync(history, CT):&#xa;  Task&lt;AgentChatResponse&gt;" vertex="1">
+          <mxGeometry height="36" width="233.33333333333334" x="8.333333333333334" y="130" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-16" edge="1" parent="1" source="offline" style="edgeStyle=segmentEdgeStyle;rounded=0;html=0;strokeColor=#475569;strokeWidth=1.5;fontSize=13;labelBackgroundColor=#ffffff;endArrow=block;endFill=0;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" target="base-agent" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1970" y="740" />
+              <mxPoint x="2305" y="740" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge-17" edge="1" parent="1" source="copilot" style="edgeStyle=segmentEdgeStyle;rounded=0;html=0;strokeColor=#475569;strokeWidth=1.5;fontSize=13;labelBackgroundColor=#ffffff;endArrow=block;endFill=0;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" target="base-agent" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="2325" y="740" />
+              <mxPoint x="2305" y="740" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge-18" edge="1" parent="1" source="fallback" style="edgeStyle=segmentEdgeStyle;rounded=0;html=0;strokeColor=#475569;strokeWidth=1.5;fontSize=13;labelBackgroundColor=#ffffff;endArrow=block;endFill=0;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" target="base-agent" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="2690" y="740" />
+              <mxPoint x="2305" y="740" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge-19" edge="1" parent="1" source="fallback" style="edgeStyle=segmentEdgeStyle;rounded=0;html=0;strokeColor=#475569;strokeWidth=1.5;fontSize=13;labelBackgroundColor=#ffffff;dashed=1;endArrow=open;endFill=0;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" target="copilot" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="2520" y="906" />
+              <mxPoint x="2520" y="889.5" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge-19-label" connectable="0" parent="edge-19" style="text;html=0;whiteSpace=wrap;align=center;verticalAlign=middle;fontSize=12;fontColor=#334155;fillColor=#ffffff;strokeColor=none;rotation=-90;" value="delegates" vertex="1">
+          <mxGeometry height="21" relative="1" width="80.60000000000001" x="-1" as="geometry">
+            <mxPoint x="-81" y="-7" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge-20" edge="1" parent="1" source="fallback" style="edgeStyle=segmentEdgeStyle;rounded=0;html=0;strokeColor=#475569;strokeWidth=1.5;fontSize=13;labelBackgroundColor=#ffffff;dashed=1;endArrow=open;endFill=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" target="offline" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="2690" y="1160" />
+              <mxPoint x="1970" y="1160" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge-20-label" connectable="0" parent="edge-20" style="text;html=0;whiteSpace=wrap;align=center;verticalAlign=middle;fontSize=12;fontColor=#334155;fillColor=#ffffff;strokeColor=none;" value="fallback" vertex="1">
+          <mxGeometry height="21" relative="1" width="73.2" x="-1" as="geometry">
+            <mxPoint x="-276.6" y="157.5" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="client-factory" parent="1" style="rounded=0;html=0;fillColor=#fff2d5;strokeColor=#475569;strokeWidth=1.4;container=1;collapsible=0;" value="" vertex="1">
+          <mxGeometry height="100" width="340" x="1840" y="1290" as="geometry" />
+        </mxCell>
+        <mxCell id="client-factory-title" parent="client-factory" style="text;html=0;whiteSpace=wrap;overflow=hidden;align=center;verticalAlign=middle;fontFamily=Helvetica;fontSize=14;fontColor=#0f172a;fontStyle=1;spacing=0;" value="«interface»&#xa;ICopilotClientFactory" vertex="1">
+          <mxGeometry height="40" width="324" x="8" y="6" as="geometry" />
+        </mxCell>
+        <mxCell id="client-factory-divider-0" parent="client-factory" style="line;strokeColor=#64748b;strokeWidth=1;" value="" vertex="1">
+          <mxGeometry width="340" y="52" as="geometry" />
+        </mxCell>
+        <mxCell id="client-factory-body-0" parent="client-factory" style="text;html=0;whiteSpace=wrap;overflow=hidden;align=left;verticalAlign=middle;fontFamily=Helvetica;fontSize=12;fontColor=#1e293b;fontStyle=0;spacing=0;" value="+ Create(options: CopilotClientOptions):&#xa;  ICopilotClient" vertex="1">
+          <mxGeometry height="36" width="320" x="10" y="58" as="geometry" />
+        </mxCell>
+        <mxCell id="client" parent="1" style="rounded=0;html=0;fillColor=#fff2d5;strokeColor=#475569;strokeWidth=1.4;container=1;collapsible=0;" value="" vertex="1">
+          <mxGeometry height="166" width="210" x="2220" y="1290" as="geometry" />
+        </mxCell>
+        <mxCell id="client-title" parent="client" style="text;html=0;whiteSpace=wrap;overflow=hidden;align=center;verticalAlign=middle;fontFamily=Helvetica;fontSize=14;fontColor=#0f172a;fontStyle=1;spacing=0;" value="«interface»&#xa;ICopilotClient" vertex="1">
+          <mxGeometry height="40" width="199.16129032258064" x="5.419354838709677" y="6" as="geometry" />
+        </mxCell>
+        <mxCell id="client-divider-0" parent="client" style="line;strokeColor=#64748b;strokeWidth=1;" value="" vertex="1">
+          <mxGeometry width="209.99999999999997" y="52" as="geometry" />
+        </mxCell>
+        <mxCell id="client-body-0" parent="client" style="text;html=0;whiteSpace=wrap;overflow=hidden;align=left;verticalAlign=middle;fontFamily=Helvetica;fontSize=12;fontColor=#1e293b;fontStyle=0;spacing=0;" value="+ StartAsync(CT): Task&#xa;+ CreateSessionAsync(config:&#xa;  SessionConfig, CT):&#xa;  Task&lt;ICopilotSession&gt;" vertex="1">
+          <mxGeometry height="70" width="196.4516129032258" x="6.774193548387096" y="58" as="geometry" />
+        </mxCell>
+        <mxCell id="client-divider-1" parent="client" style="line;strokeColor=#64748b;strokeWidth=1;" value="" vertex="1">
+          <mxGeometry width="209.99999999999997" y="134" as="geometry" />
+        </mxCell>
+        <mxCell id="client-body-1" parent="client" style="text;html=0;whiteSpace=wrap;overflow=hidden;align=left;verticalAlign=middle;fontFamily=Helvetica;fontSize=12;fontColor=#475569;fontStyle=0;spacing=0;" value="Extends IAsyncDisposable." vertex="1">
+          <mxGeometry height="20" width="196.4516129032258" x="6.774193548387096" y="140" as="geometry" />
+        </mxCell>
+        <mxCell id="session" parent="1" style="rounded=0;html=0;fillColor=#fff2d5;strokeColor=#475569;strokeWidth=1.4;container=1;collapsible=0;" value="" vertex="1">
+          <mxGeometry height="149" width="270" x="2570" y="1290" as="geometry" />
+        </mxCell>
+        <mxCell id="session-title" parent="session" style="text;html=0;whiteSpace=wrap;overflow=hidden;align=center;verticalAlign=middle;fontFamily=Helvetica;fontSize=14;fontColor=#0f172a;fontStyle=1;spacing=0;" value="«interface»&#xa;ICopilotSession" vertex="1">
+          <mxGeometry height="40" width="254" x="8" y="6" as="geometry" />
+        </mxCell>
+        <mxCell id="session-divider-0" parent="session" style="line;strokeColor=#64748b;strokeWidth=1;" value="" vertex="1">
+          <mxGeometry width="270" y="52" as="geometry" />
+        </mxCell>
+        <mxCell id="session-body-0" parent="session" style="text;html=0;whiteSpace=wrap;overflow=hidden;align=left;verticalAlign=middle;fontFamily=Helvetica;fontSize=12;fontColor=#1e293b;fontStyle=0;spacing=0;" value="+ SendAndWaitAsync(options:&#xa;  MessageOptions, CT):&#xa;  Task&lt;AssistantMessageEvent?&gt;" vertex="1">
+          <mxGeometry height="53" width="250" x="10" y="58" as="geometry" />
+        </mxCell>
+        <mxCell id="session-divider-1" parent="session" style="line;strokeColor=#64748b;strokeWidth=1;" value="" vertex="1">
+          <mxGeometry width="270" y="117" as="geometry" />
+        </mxCell>
+        <mxCell id="session-body-1" parent="session" style="text;html=0;whiteSpace=wrap;overflow=hidden;align=left;verticalAlign=middle;fontFamily=Helvetica;fontSize=12;fontColor=#475569;fontStyle=0;spacing=0;" value="Extends IAsyncDisposable." vertex="1">
+          <mxGeometry height="20" width="250" x="10" y="123" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-21" edge="1" parent="1" source="copilot" style="edgeStyle=segmentEdgeStyle;rounded=0;html=0;strokeColor=#475569;strokeWidth=1.5;fontSize=13;labelBackgroundColor=#ffffff;dashed=1;endArrow=open;endFill=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="client-factory" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="2325" y="1110" />
+              <mxPoint x="2010" y="1110" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge-21-label" connectable="0" parent="edge-21" style="text;html=0;whiteSpace=wrap;align=center;verticalAlign=middle;fontSize=12;fontColor=#334155;fillColor=#ffffff;strokeColor=none;" value="uses per request" vertex="1">
+          <mxGeometry height="21" relative="1" width="132.4" x="-1" as="geometry">
+            <mxPoint x="-141.2" y="138.5" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge-22" edge="1" parent="1" source="client-factory" style="edgeStyle=segmentEdgeStyle;rounded=0;html=0;strokeColor=#475569;strokeWidth=1.5;fontSize=13;labelBackgroundColor=#ffffff;dashed=1;endArrow=open;endFill=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="client" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="2200" y="1340" />
+              <mxPoint x="2200" y="1373" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge-22-label" connectable="0" parent="edge-22" style="text;html=0;whiteSpace=wrap;align=center;verticalAlign=middle;fontSize=12;fontColor=#334155;fillColor=#ffffff;strokeColor=none;rotation=-90;" value="creates" vertex="1">
+          <mxGeometry height="21" relative="1" width="65.80000000000001" x="-1" as="geometry">
+            <mxPoint x="-14" y="-28" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge-23" edge="1" parent="1" source="client" style="edgeStyle=segmentEdgeStyle;rounded=0;html=0;strokeColor=#475569;strokeWidth=1.5;fontSize=13;labelBackgroundColor=#ffffff;dashed=1;endArrow=open;endFill=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="session" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="2430" y="1364.5" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge-23-label" connectable="0" parent="edge-23" style="text;html=0;whiteSpace=wrap;align=center;verticalAlign=middle;fontSize=12;fontColor=#334155;fillColor=#ffffff;strokeColor=none;" value="creates" vertex="1">
+          <mxGeometry height="21" relative="1" width="65.80000000000001" x="-1" as="geometry">
+            <mxPoint x="40" y="-19" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge-24" edge="1" parent="1" source="factory" style="edgeStyle=segmentEdgeStyle;rounded=0;html=0;strokeColor=#475569;strokeWidth=1.5;fontSize=13;labelBackgroundColor=#ffffff;dashed=1;endArrow=block;endFill=0;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" target="client-factory" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="options" parent="1" style="rounded=0;html=0;fillColor=#fff2d5;strokeColor=#475569;strokeWidth=1.4;container=1;collapsible=0;" value="" vertex="1">
+          <mxGeometry height="107" width="270" x="2230" y="1600" as="geometry" />
+        </mxCell>
+        <mxCell id="options-title" parent="options" style="text;html=0;whiteSpace=wrap;overflow=hidden;align=center;verticalAlign=middle;fontFamily=Helvetica;fontSize=14;fontColor=#0f172a;fontStyle=1;spacing=0;" value="CopilotOptions" vertex="1">
+          <mxGeometry height="30" width="255.6" x="7.2" y="6" as="geometry" />
+        </mxCell>
+        <mxCell id="options-divider-0" parent="options" style="line;strokeColor=#64748b;strokeWidth=1;" value="" vertex="1">
+          <mxGeometry width="270" y="42" as="geometry" />
+        </mxCell>
+        <mxCell id="options-body-0" parent="options" style="text;html=0;whiteSpace=wrap;overflow=hidden;align=left;verticalAlign=middle;fontFamily=Helvetica;fontSize=12;fontColor=#1e293b;fontStyle=0;spacing=0;" value="+ GitHubToken: string? {init}&#xa;+ ResponseTimeoutSeconds: int {init}&#xa;  = 30" vertex="1">
+          <mxGeometry height="53" width="252" x="9" y="48" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-26" edge="1" parent="1" source="fallback" style="edgeStyle=segmentEdgeStyle;rounded=0;html=0;strokeColor=#475569;strokeWidth=1.5;fontSize=13;labelBackgroundColor=#ffffff;dashed=1;endArrow=open;endFill=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" target="options" value="">
+          <mxGeometry relative="1" x="-0.0004" as="geometry">
+            <Array as="points">
+              <mxPoint x="2840" y="970" />
+              <mxPoint x="2860" y="970" />
+              <mxPoint x="2860" y="1750" />
+              <mxPoint x="2550" y="1750" />
+              <mxPoint x="2550" y="1653.5" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge-26-label" connectable="0" parent="edge-26" style="text;html=0;whiteSpace=wrap;align=center;verticalAlign=middle;fontSize=12;fontColor=#334155;fillColor=#ffffff;strokeColor=none;" value="timeout configuration" vertex="1">
+          <mxGeometry height="21" relative="1" width="169.4" x="-1" as="geometry">
+            <mxPoint x="-234.7" y="833.5" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="response" parent="1" style="rounded=0;html=0;fillColor=#fff2d5;strokeColor=#475569;strokeWidth=1.4;container=1;collapsible=0;" value="" vertex="1">
+          <mxGeometry height="74" width="270" x="2570" y="1600" as="geometry" />
+        </mxCell>
+        <mxCell id="response-title" parent="response" style="text;html=0;whiteSpace=wrap;overflow=hidden;align=center;verticalAlign=middle;fontFamily=Helvetica;fontSize=14;fontColor=#0f172a;fontStyle=1;spacing=0;" value="AgentChatResponse" vertex="1">
+          <mxGeometry height="30" width="254" x="8" y="6" as="geometry" />
+        </mxCell>
+        <mxCell id="response-divider-0" parent="response" style="line;strokeColor=#64748b;strokeWidth=1;" value="" vertex="1">
+          <mxGeometry width="270" y="42" as="geometry" />
+        </mxCell>
+        <mxCell id="response-body-0" parent="response" style="text;html=0;whiteSpace=wrap;overflow=hidden;align=left;verticalAlign=middle;fontFamily=Helvetica;fontSize=12;fontColor=#1e293b;fontStyle=0;spacing=0;" value="+ Content: string {required}" vertex="1">
+          <mxGeometry height="20" width="250" x="10" y="48" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-27" edge="1" parent="1" source="agent-interface" style="edgeStyle=segmentEdgeStyle;rounded=0;html=0;strokeColor=#475569;strokeWidth=1.5;fontSize=13;labelBackgroundColor=#ffffff;dashed=1;endArrow=open;endFill=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" target="response" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="2850" y="290" />
+              <mxPoint x="2850" y="1520" />
+              <mxPoint x="2850" y="1646" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge-27-label" connectable="0" parent="edge-27" style="text;html=0;whiteSpace=wrap;align=center;verticalAlign=middle;fontSize=12;fontColor=#334155;fillColor=#ffffff;strokeColor=none;rotation=-90;" value="returns" vertex="1">
+          <mxGeometry height="21" relative="1" width="65.80000000000001" x="-1" as="geometry">
+            <mxPoint x="158" y="1245" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="validator" parent="1" style="rounded=0;html=0;fillColor=#fff2d5;strokeColor=#475569;strokeWidth=1.4;container=1;collapsible=0;" value="" vertex="1">
+          <mxGeometry height="84" width="420" x="60" y="1210" as="geometry" />
+        </mxCell>
+        <mxCell id="validator-title" parent="validator" style="text;html=0;whiteSpace=wrap;overflow=hidden;align=center;verticalAlign=middle;fontFamily=Helvetica;fontSize=14;fontColor=#0f172a;fontStyle=1;spacing=0;" value="«internal static»&#xa;ChatAgentRequestValidator" vertex="1">
+          <mxGeometry height="40" width="404" x="8" y="6" as="geometry" />
+        </mxCell>
+        <mxCell id="validator-divider-0" parent="validator" style="line;strokeColor=#64748b;strokeWidth=1;" value="" vertex="1">
+          <mxGeometry width="420" y="52" as="geometry" />
+        </mxCell>
+        <mxCell id="validator-body-0" parent="validator" style="text;html=0;whiteSpace=wrap;overflow=hidden;align=left;verticalAlign=middle;fontFamily=Helvetica;fontSize=12;fontColor=#1e293b;fontStyle=0;spacing=0;" value="+ Validate(history, CT): void" vertex="1">
+          <mxGeometry height="20" width="400" x="10" y="58" as="geometry" />
+        </mxCell>
+        <mxCell id="agent-exception" parent="1" style="rounded=0;html=0;fillColor=#fff2d5;strokeColor=#475569;strokeWidth=1.4;container=1;collapsible=0;" value="" vertex="1">
+          <mxGeometry height="106" width="390" x="540" y="1210" as="geometry" />
+        </mxCell>
+        <mxCell id="agent-exception-title" parent="agent-exception" style="text;html=0;whiteSpace=wrap;overflow=hidden;align=center;verticalAlign=middle;fontFamily=Helvetica;fontSize=14;fontColor=#0f172a;fontStyle=1;spacing=0;" value="ChatAgentException" vertex="1">
+          <mxGeometry height="30" width="374" x="8" y="6" as="geometry" />
+        </mxCell>
+        <mxCell id="agent-exception-divider-0" parent="agent-exception" style="line;strokeColor=#64748b;strokeWidth=1;" value="" vertex="1">
+          <mxGeometry width="390" y="42" as="geometry" />
+        </mxCell>
+        <mxCell id="agent-exception-body-0" parent="agent-exception" style="text;html=0;whiteSpace=wrap;overflow=hidden;align=left;verticalAlign=middle;fontFamily=Helvetica;fontSize=12;fontColor=#1e293b;fontStyle=0;spacing=0;" value="+ ChatAgentException(innerException)" vertex="1">
+          <mxGeometry height="20" width="370" x="10" y="48" as="geometry" />
+        </mxCell>
+        <mxCell id="agent-exception-divider-1" parent="agent-exception" style="line;strokeColor=#64748b;strokeWidth=1;" value="" vertex="1">
+          <mxGeometry width="390" y="74" as="geometry" />
+        </mxCell>
+        <mxCell id="agent-exception-body-1" parent="agent-exception" style="text;html=0;whiteSpace=wrap;overflow=hidden;align=left;verticalAlign=middle;fontFamily=Helvetica;fontSize=12;fontColor=#475569;fontStyle=0;spacing=0;" value="Extends System.Exception to give safe public error text." vertex="1">
+          <mxGeometry height="20" width="370" x="10" y="80" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-28" edge="1" parent="1" source="base-agent" style="edgeStyle=segmentEdgeStyle;rounded=0;html=0;strokeColor=#475569;strokeWidth=1.5;fontSize=13;labelBackgroundColor=#ffffff;dashed=1;endArrow=open;endFill=0;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" target="sanitizer" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1775" y="553" />
+              <mxPoint x="1775" y="1180" />
+              <mxPoint x="970" y="1180" />
+              <mxPoint x="970" y="924" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge-28-label" connectable="0" parent="edge-28" style="text;html=0;whiteSpace=wrap;align=center;verticalAlign=middle;fontSize=12;fontColor=#334155;fillColor=#ffffff;strokeColor=none;" value="screens replies" vertex="1">
+          <mxGeometry height="21" relative="1" width="125" x="-1" as="geometry">
+            <mxPoint x="-722.5" y="658.5" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge-29" edge="1" parent="1" source="base-agent" style="edgeStyle=segmentEdgeStyle;rounded=0;html=0;strokeColor=#475569;strokeWidth=1.5;fontSize=13;labelBackgroundColor=#ffffff;dashed=1;endArrow=open;endFill=0;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" target="validator" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1780" y="553" />
+              <mxPoint x="1780" y="1235" />
+              <mxPoint x="980" y="1235" />
+              <mxPoint x="980" y="1390" />
+              <mxPoint x="270" y="1390" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge-29-label" connectable="0" parent="edge-29" style="text;html=0;whiteSpace=wrap;align=center;verticalAlign=middle;fontSize=12;fontColor=#334155;fillColor=#ffffff;strokeColor=none;" value="validates history" vertex="1">
+          <mxGeometry height="21" relative="1" width="139.8" x="-1" as="geometry">
+            <mxPoint x="-1460" y="869" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge-30" edge="1" parent="1" source="copilot" style="edgeStyle=segmentEdgeStyle;rounded=0;html=0;strokeColor=#475569;strokeWidth=1.5;fontSize=13;labelBackgroundColor=#ffffff;dashed=1;endArrow=open;endFill=0;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" target="agent-exception" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="2130" y="889.5" />
+              <mxPoint x="2130" y="1200" />
+              <mxPoint x="1778" y="1200" />
+              <mxPoint x="1778" y="1500" />
+              <mxPoint x="735" y="1500" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge-30-label" connectable="0" parent="edge-30" style="text;html=0;whiteSpace=wrap;align=center;verticalAlign=middle;fontSize=12;fontColor=#334155;fillColor=#ffffff;strokeColor=none;" value="wraps SDK failure" vertex="1">
+          <mxGeometry height="21" relative="1" width="139.8" x="-1" as="geometry">
+            <mxPoint x="-1370" y="600" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="ui-ref" parent="1" style="shape=note;size=16;html=0;whiteSpace=wrap;fillColor=#fffbe8;strokeColor=#475569;strokeWidth=1.5;fontColor=#0f172a;fontSize=12;align=center;verticalAlign=middle;spacing=8;" value="The Blazor Chat page (UI) injects IChatService.&#xa;Program.Main registers scoped services and chooses OfflineChatAgent or CopilotFallbackChatAgent from Chat:Agent." vertex="1">
+          <mxGeometry height="160" width="870" x="60" y="1600" as="geometry" />
+        </mxCell>
+        <mxCell id="persistence-package" parent="1" style="shape=swimlane;html=0;startSize=38;horizontal=1;collapsible=0;container=0;rounded=0;fillColor=#f8fafc;swimlaneFillColor=#ffffff;strokeColor=#cbd5e1;fontColor=#334155;fontSize=17;fontStyle=1;align=left;spacingLeft=14;" value="Yodaphone.Web.Data / Data.Entities" vertex="1">
+          <mxGeometry height="1990" width="1240" x="2960" y="150" as="geometry" />
+        </mxCell>
+        <mxCell id="data-user" parent="1" style="rounded=0;html=0;fillColor=#f0e9ff;strokeColor=#475569;strokeWidth=1.4;container=1;collapsible=0;" value="" vertex="1">
+          <mxGeometry height="152" width="1020" x="3010" y="230" as="geometry" />
+        </mxCell>
+        <mxCell id="data-user-title" parent="data-user" style="text;html=0;whiteSpace=wrap;overflow=hidden;align=center;verticalAlign=middle;fontFamily=Helvetica;fontSize=14;fontColor=#0f172a;fontStyle=1;spacing=0;" value="«entity»&#xa;User&#xa;Yodaphone.Web.Data.Entities" vertex="1">
+          <mxGeometry height="58" width="1004" x="8" y="6" as="geometry" />
+        </mxCell>
+        <mxCell id="data-user-divider-0" parent="data-user" style="line;strokeColor=#64748b;strokeWidth=1;" value="" vertex="1">
+          <mxGeometry width="1020" y="70" as="geometry" />
+        </mxCell>
+        <mxCell id="data-user-body-0" parent="data-user" style="text;html=0;whiteSpace=wrap;overflow=hidden;align=left;verticalAlign=middle;fontFamily=Helvetica;fontSize=12;fontColor=#1e293b;fontStyle=0;spacing=0;" value="+ UserId: int {PK}&#xa;+ Support: bool&#xa;+ Conversations: ICollection&lt;Conversation&gt;&#xa;+ Messages: ICollection&lt;Message&gt;" vertex="1">
+          <mxGeometry height="70" width="1000" x="10" y="76" as="geometry" />
+        </mxCell>
+        <mxCell id="data-conversation" parent="1" style="rounded=0;html=0;fillColor=#f0e9ff;strokeColor=#475569;strokeWidth=1.4;container=1;collapsible=0;" value="" vertex="1">
+          <mxGeometry height="237" width="1020" x="3010" y="610" as="geometry" />
+        </mxCell>
+        <mxCell id="data-conversation-title" parent="data-conversation" style="text;html=0;whiteSpace=wrap;overflow=hidden;align=center;verticalAlign=middle;fontFamily=Helvetica;fontSize=14;fontColor=#0f172a;fontStyle=1;spacing=0;" value="«entity»&#xa;Conversation&#xa;Yodaphone.Web.Data.Entities" vertex="1">
+          <mxGeometry height="58" width="1004" x="8" y="6" as="geometry" />
+        </mxCell>
+        <mxCell id="data-conversation-divider-0" parent="data-conversation" style="line;strokeColor=#64748b;strokeWidth=1;" value="" vertex="1">
+          <mxGeometry width="1020" y="70" as="geometry" />
+        </mxCell>
+        <mxCell id="data-conversation-body-0" parent="data-conversation" style="text;html=0;whiteSpace=wrap;overflow=hidden;align=left;verticalAlign=middle;fontFamily=Helvetica;fontSize=12;fontColor=#1e293b;fontStyle=0;spacing=0;" value="+ ConversationId: int {PK}&#xa;+ Id: Guid {unique}&#xa;+ UserId: int {FK}&#xa;+ Start: DateTime&#xa;+ DateTime: DateTime&#xa;+ LastUpdated: DateTime&#xa;+ Closed: bool&#xa;+ User: User&#xa;+ Messages: ICollection&lt;Message&gt;" vertex="1">
+          <mxGeometry height="155" width="1000" x="10" y="76" as="geometry" />
+        </mxCell>
+        <mxCell id="data-message" parent="1" style="rounded=0;html=0;fillColor=#f0e9ff;strokeColor=#475569;strokeWidth=1.4;container=1;collapsible=0;" value="" vertex="1">
+          <mxGeometry height="237" width="1020" x="3010" y="1080" as="geometry" />
+        </mxCell>
+        <mxCell id="data-message-title" parent="data-message" style="text;html=0;whiteSpace=wrap;overflow=hidden;align=center;verticalAlign=middle;fontFamily=Helvetica;fontSize=14;fontColor=#0f172a;fontStyle=1;spacing=0;" value="«entity»&#xa;Message&#xa;Yodaphone.Web.Data.Entities" vertex="1">
+          <mxGeometry height="58" width="1004" x="8" y="6" as="geometry" />
+        </mxCell>
+        <mxCell id="data-message-divider-0" parent="data-message" style="line;strokeColor=#64748b;strokeWidth=1;" value="" vertex="1">
+          <mxGeometry width="1020" y="70" as="geometry" />
+        </mxCell>
+        <mxCell id="data-message-body-0" parent="data-message" style="text;html=0;whiteSpace=wrap;overflow=hidden;align=left;verticalAlign=middle;fontFamily=Helvetica;fontSize=12;fontColor=#1e293b;fontStyle=0;spacing=0;" value="+ MessageId: int {PK}&#xa;+ Id: Guid {unique}&#xa;+ MessageContent: string&#xa;+ DateTime: DateTime&#xa;+ Status: string {MessageRole name}&#xa;+ SenderId: int {FK}&#xa;+ ConversationId: int {FK}&#xa;+ Sender: User&#xa;+ Conversation: Conversation" vertex="1">
+          <mxGeometry height="155" width="1000" x="10" y="76" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-31" edge="1" parent="1" source="data-user" style="edgeStyle=segmentEdgeStyle;rounded=0;html=0;strokeColor=#475569;strokeWidth=1.5;fontSize=13;labelBackgroundColor=#ffffff;endArrow=none;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="data-conversation" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-31-label" connectable="0" parent="edge-31" style="text;html=0;whiteSpace=wrap;align=center;verticalAlign=middle;fontSize=12;fontColor=#334155;fillColor=#ffffff;strokeColor=none;" value="owner / conversations" vertex="1">
+          <mxGeometry height="21" relative="1" width="169.4" x="-1" as="geometry">
+            <mxPoint x="-85" y="88" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="multiplicity-32" parent="1" style="text;html=0;whiteSpace=wrap;overflow=hidden;align=left;verticalAlign=middle;fontFamily=Helvetica;fontSize=12;fontColor=#334155;fontStyle=1;spacing=0;" value="1" vertex="1">
+          <mxGeometry height="20" width="34" x="3532" y="389" as="geometry" />
+        </mxCell>
+        <mxCell id="multiplicity-33" parent="1" style="text;html=0;whiteSpace=wrap;overflow=hidden;align=left;verticalAlign=middle;fontFamily=Helvetica;fontSize=12;fontColor=#334155;fontStyle=1;spacing=0;" value="0..*" vertex="1">
+          <mxGeometry height="20" width="34" x="3532" y="585" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-34" edge="1" parent="1" source="data-conversation" style="edgeStyle=segmentEdgeStyle;rounded=0;html=0;strokeColor=#475569;strokeWidth=1.5;fontSize=13;labelBackgroundColor=#ffffff;endArrow=none;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="data-message" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-34-label" connectable="0" parent="edge-34" style="text;html=0;whiteSpace=wrap;align=center;verticalAlign=middle;fontSize=12;fontColor=#334155;fillColor=#ffffff;strokeColor=none;" value="conversation / messages" vertex="1">
+          <mxGeometry height="21" relative="1" width="184.20000000000002" x="-1" as="geometry">
+            <mxPoint x="-100" y="103" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="multiplicity-35" parent="1" style="text;html=0;whiteSpace=wrap;overflow=hidden;align=left;verticalAlign=middle;fontFamily=Helvetica;fontSize=12;fontColor=#334155;fontStyle=1;spacing=0;" value="1" vertex="1">
+          <mxGeometry height="20" width="34" x="3532" y="854" as="geometry" />
+        </mxCell>
+        <mxCell id="multiplicity-36" parent="1" style="text;html=0;whiteSpace=wrap;overflow=hidden;align=left;verticalAlign=middle;fontFamily=Helvetica;fontSize=12;fontColor=#334155;fontStyle=1;spacing=0;" value="0..*" vertex="1">
+          <mxGeometry height="20" width="34" x="3532" y="1055" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-37" edge="1" parent="1" source="data-user" style="edgeStyle=segmentEdgeStyle;rounded=0;html=0;strokeColor=#475569;strokeWidth=1.5;fontSize=13;labelBackgroundColor=#ffffff;endArrow=none;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" target="data-message" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="4070" y="306" />
+              <mxPoint x="4070" y="1198.5" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge-37-label" connectable="0" parent="edge-37" style="text;html=0;whiteSpace=wrap;align=center;verticalAlign=middle;fontSize=12;fontColor=#334155;fillColor=#ffffff;strokeColor=none;" value="sender / messages" vertex="1">
+          <mxGeometry height="21" relative="1" width="139.8" x="-1" as="geometry">
+            <mxPoint x="-60" y="680" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="multiplicity-38" parent="1" style="text;html=0;whiteSpace=wrap;overflow=hidden;align=left;verticalAlign=middle;fontFamily=Helvetica;fontSize=12;fontColor=#334155;fontStyle=1;spacing=0;" value="1" vertex="1">
+          <mxGeometry height="20" width="34" x="4043" y="281" as="geometry" />
+        </mxCell>
+        <mxCell id="multiplicity-39" parent="1" style="text;html=0;whiteSpace=wrap;overflow=hidden;align=left;verticalAlign=middle;fontFamily=Helvetica;fontSize=12;fontColor=#334155;fontStyle=1;spacing=0;" value="0..*" vertex="1">
+          <mxGeometry height="20" width="34" x="4043" y="1173.5" as="geometry" />
+        </mxCell>
+        <mxCell id="db-context" parent="1" style="rounded=0;html=0;fillColor=#f0e9ff;strokeColor=#475569;strokeWidth=1.4;container=1;collapsible=0;" value="" vertex="1">
+          <mxGeometry height="149" width="1020" x="3010" y="1510" as="geometry" />
+        </mxCell>
+        <mxCell id="db-context-title" parent="db-context" style="text;html=0;whiteSpace=wrap;overflow=hidden;align=center;verticalAlign=middle;fontFamily=Helvetica;fontSize=14;fontColor=#0f172a;fontStyle=1;spacing=0;" value="ApplicationDbContext&#xa;Yodaphone.Web.Data" vertex="1">
+          <mxGeometry height="40" width="1004" x="8" y="6" as="geometry" />
+        </mxCell>
+        <mxCell id="db-context-divider-0" parent="db-context" style="line;strokeColor=#64748b;strokeWidth=1;" value="" vertex="1">
+          <mxGeometry width="1020" y="52" as="geometry" />
+        </mxCell>
+        <mxCell id="db-context-body-0" parent="db-context" style="text;html=0;whiteSpace=wrap;overflow=hidden;align=left;verticalAlign=middle;fontFamily=Helvetica;fontSize=12;fontColor=#1e293b;fontStyle=0;spacing=0;" value="+ Users: DbSet&lt;User&gt;&#xa;+ Conversations: DbSet&lt;Data.Entities.Conversation&gt;&#xa;+ Messages: DbSet&lt;Data.Entities.Message&gt;" vertex="1">
+          <mxGeometry height="53" width="1000" x="10" y="58" as="geometry" />
+        </mxCell>
+        <mxCell id="db-context-divider-1" parent="db-context" style="line;strokeColor=#64748b;strokeWidth=1;" value="" vertex="1">
+          <mxGeometry width="1020" y="117" as="geometry" />
+        </mxCell>
+        <mxCell id="db-context-body-1" parent="db-context" style="text;html=0;whiteSpace=wrap;overflow=hidden;align=left;verticalAlign=middle;fontFamily=Helvetica;fontSize=12;fontColor=#1e293b;fontStyle=0;spacing=0;" value="# OnModelCreating(modelBuilder): void" vertex="1">
+          <mxGeometry height="20" width="1000" x="10" y="123" as="geometry" />
+        </mxCell>
+        <mxCell id="ef-dbcontext" parent="1" style="rounded=0;html=0;fillColor=#f1f3f5;strokeColor=#475569;strokeWidth=1.4;container=1;collapsible=0;" value="" vertex="1">
+          <mxGeometry height="70" width="330" x="3355" y="1870" as="geometry" />
+        </mxCell>
+        <mxCell id="ef-dbcontext-title" parent="ef-dbcontext" style="text;html=0;whiteSpace=wrap;overflow=hidden;align=center;verticalAlign=middle;fontFamily=Helvetica;fontSize=14;fontColor=#0f172a;fontStyle=1;spacing=0;" value="«external»&#xa;DbContext&#xa;Microsoft.EntityFrameworkCore" vertex="1">
+          <mxGeometry height="58" width="314" x="8" y="6" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-40" edge="1" parent="1" source="db-context" style="edgeStyle=segmentEdgeStyle;rounded=0;html=0;strokeColor=#475569;strokeWidth=1.5;fontSize=13;labelBackgroundColor=#ffffff;endArrow=block;endFill=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="ef-dbcontext" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-41" edge="1" parent="1" source="db-context" style="edgeStyle=segmentEdgeStyle;rounded=0;html=0;strokeColor=#475569;strokeWidth=1.5;fontSize=13;labelBackgroundColor=#ffffff;dashed=1;endArrow=open;endFill=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" target="data-user" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="4110" y="1584.5" />
+              <mxPoint x="4110" y="306" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge-41-label" connectable="0" parent="edge-41" style="text;html=0;whiteSpace=wrap;align=center;verticalAlign=middle;fontSize=12;fontColor=#334155;fillColor=#ffffff;strokeColor=none;rotation=-90;" value="Users: DbSet&lt;User&gt;" vertex="1">
+          <mxGeometry height="21" relative="1" width="147.20000000000002" x="-1" as="geometry">
+            <mxPoint x="7" y="-1084" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge-42" edge="1" parent="1" source="db-context" style="edgeStyle=segmentEdgeStyle;rounded=0;html=0;strokeColor=#475569;strokeWidth=1.5;fontSize=13;labelBackgroundColor=#ffffff;dashed=1;endArrow=open;endFill=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" target="data-conversation" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="4130" y="1584.5" />
+              <mxPoint x="4130" y="728.5" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge-42-label" connectable="0" parent="edge-42" style="text;html=0;whiteSpace=wrap;align=center;verticalAlign=middle;fontSize=12;fontColor=#334155;fillColor=#ffffff;strokeColor=none;rotation=-90;" value="Conversations: DbSet&lt;Conversation&gt;" vertex="1">
+          <mxGeometry height="21" relative="1" width="265.6" x="-1" as="geometry">
+            <mxPoint x="-32" y="-621" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge-43" edge="1" parent="1" source="db-context" style="edgeStyle=segmentEdgeStyle;rounded=0;html=0;strokeColor=#475569;strokeWidth=1.5;fontSize=13;labelBackgroundColor=#ffffff;dashed=1;endArrow=open;endFill=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" target="data-message" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="4150" y="1584.5" />
+              <mxPoint x="4150" y="1198.5" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge-43-label" connectable="0" parent="edge-43" style="text;html=0;whiteSpace=wrap;align=center;verticalAlign=middle;fontSize=12;fontColor=#334155;fillColor=#ffffff;strokeColor=none;rotation=-90;" value="Messages: DbSet&lt;Message&gt;" vertex="1">
+          <mxGeometry height="21" relative="1" width="191.60000000000002" x="-1" as="geometry">
+            <mxPoint x="25" y="-220" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge-44" edge="1" parent="1" source="repo" style="edgeStyle=segmentEdgeStyle;rounded=0;html=0;strokeColor=#475569;strokeWidth=1.5;fontSize=13;labelBackgroundColor=#ffffff;dashed=1;endArrow=open;endFill=0;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="conversation" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="990" y="1614" />
+              <mxPoint x="990" y="2010" />
+              <mxPoint x="50" y="2010" />
+              <mxPoint x="50" y="340" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge-44-label" connectable="0" parent="edge-44" style="text;html=0;whiteSpace=wrap;align=center;verticalAlign=middle;fontSize=12;fontColor=#334155;fillColor=#ffffff;strokeColor=none;" value="restores domain objects" vertex="1">
+          <mxGeometry height="21" relative="1" width="184.20000000000002" x="-1" as="geometry">
+            <mxPoint x="-532.1" y="385.5" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge-45" edge="1" parent="1" source="repo" style="edgeStyle=segmentEdgeStyle;rounded=0;html=0;strokeColor=#475569;strokeWidth=1.5;fontSize=13;labelBackgroundColor=#ffffff;dashed=1;endArrow=open;endFill=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="data-conversation" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1755" y="1614" />
+              <mxPoint x="1755" y="2050" />
+              <mxPoint x="2900" y="2050" />
+              <mxPoint x="2900" y="728.5" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge-45-label" connectable="0" parent="edge-45" style="text;html=0;whiteSpace=wrap;align=center;verticalAlign=middle;fontSize=12;fontColor=#334155;fillColor=#ffffff;strokeColor=none;" value="maps GUID, timestamps and closed state" vertex="1">
+          <mxGeometry height="21" relative="1" width="295.2" x="-1" as="geometry">
+            <mxPoint x="492.4" y="425.5" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge-46" edge="1" parent="1" source="repo" style="edgeStyle=segmentEdgeStyle;rounded=0;html=0;strokeColor=#475569;strokeWidth=1.5;fontSize=13;labelBackgroundColor=#ffffff;dashed=1;endArrow=open;endFill=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="data-message" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1760" y="1614" />
+              <mxPoint x="1760" y="2085" />
+              <mxPoint x="2920" y="2085" />
+              <mxPoint x="2920" y="1198.5" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge-46-label" connectable="0" parent="edge-46" style="text;html=0;whiteSpace=wrap;align=center;verticalAlign=middle;fontSize=12;fontColor=#334155;fillColor=#ffffff;strokeColor=none;" value="maps GUID, role, content and UTC&#xa;  timestamp" vertex="1">
+          <mxGeometry height="38" relative="1" width="250.8" x="-1" as="geometry">
+            <mxPoint x="514.6" y="452" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge-47" edge="1" parent="1" source="db-factory" style="edgeStyle=segmentEdgeStyle;rounded=0;html=0;strokeColor=#475569;strokeWidth=1.5;fontSize=13;labelBackgroundColor=#ffffff;dashed=1;endArrow=open;endFill=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="db-context" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1765" y="1949" />
+              <mxPoint x="1765" y="2130" />
+              <mxPoint x="2940" y="2130" />
+              <mxPoint x="2940" y="1584.5" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge-47-label" connectable="0" parent="edge-47" style="text;html=0;whiteSpace=wrap;align=center;verticalAlign=middle;fontSize=12;fontColor=#334155;fillColor=#ffffff;strokeColor=none;" value="creates one context per repository&#xa;  operation" vertex="1">
+          <mxGeometry height="38" relative="1" width="265.6" x="-1" as="geometry">
+            <mxPoint x="827.2" y="162" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="legend" parent="1" style="shape=note;size=16;html=0;whiteSpace=wrap;fillColor=#fffbe8;strokeColor=#475569;strokeWidth=1.5;fontColor=#0f172a;fontSize=12;align=center;verticalAlign=middle;spacing=8;" value="CT = CancellationToken. &#xa;Method default values and most constructors are omitted." vertex="1">
+          <mxGeometry height="58" width="4160" x="40" y="2170" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-25" edge="1" parent="1" source="factory" style="edgeStyle=segmentEdgeStyle;rounded=0;html=0;strokeColor=#475569;strokeWidth=1.5;fontSize=13;labelBackgroundColor=#ffffff;dashed=1;endArrow=open;endFill=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;exitX=0.465;exitY=1.02;exitDx=0;exitDy=0;exitPerimeter=0;" target="options" value="">
+          <mxGeometry relative="1" x="-0.488" as="geometry">
+            <Array as="points">
+              <mxPoint x="2000.8" y="1594.4" />
+              <mxPoint x="2000.8" y="1653.5" />
+            </Array>
+            <mxPoint x="2020" y="1620" as="sourcePoint" />
+            <mxPoint x="2080" y="1752.5" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge-25-label" connectable="0" parent="edge-25" style="text;html=0;whiteSpace=wrap;align=center;verticalAlign=middle;fontSize=12;fontColor=#334155;fillColor=#ffffff;strokeColor=none;" value="IOptions&lt;T&gt;" vertex="1">
+          <mxGeometry height="21" relative="1" width="95.4" x="-0.5282" as="geometry">
+            <mxPoint x="52" y="-10" as="offset" />
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

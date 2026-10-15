@@ -4,6 +4,18 @@
 
 This project is part of an assignment for Cranfield University Digital and Technology Solutions apprentices. A detailed description of the task, given in the assignment brief, can be found under the heading `The Assignment Task`.
 
+## UML diagrams
+
+Editable production and testing class diagrams, persistence and UI class views,
+and sequence and activity diagrams are available in [the UML documentation](uml/README.md).
+Open [the complete draw.io document](uml/yodaphone-uml.drawio) to view and edit all ten pages.
+The [combined application and persistence class diagram](uml/08-application-persistence-classes.drawio)
+integrates diagrams 1 and 3 into one view.
+The [poster class overview (diagram 9)](uml/09-poster-class-overview.svg) shows
+the same classes and relationships with larger names and no attributes or methods.
+The [poster UI classes (diagram 10)](uml/10-poster-ui-classes.svg) apply the same
+format to the Blazor UI classes from diagram 4.
+
 ## Dependencies
 
 This project requires the following dependencies:
